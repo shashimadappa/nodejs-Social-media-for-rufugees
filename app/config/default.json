@@ -1,0 +1,10 @@
+{
+    "jwtConfig": {
+      "enableToken": false,
+      "access_token_secret_key": "c0mp3t3!",
+      "refresh_token_secret_key": "!3t3pm0c",
+      "access_token_expire_time": "1h",
+      "refresh_token_expire_time": "24h"
+    }
+
+}
