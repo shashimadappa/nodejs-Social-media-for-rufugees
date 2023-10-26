@@ -3,7 +3,7 @@ const User = db.users;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const secretKey = "1234567890";
+const Token = require('../auth/token')
 
 
 exports.createUser = async (req, res) => {
@@ -67,7 +67,7 @@ exports.createUser = async (req, res) => {
         preferredLanguage,
         created_at,
         updated_at,
-        isActive: req.body.isActive ? reqbody.isActive : true
+        isActive: req.body.isActive ? req.isActive : true
       };
 
       const newUser = new User(userData);
@@ -87,8 +87,26 @@ exports.createUser = async (req, res) => {
   });
   };
 
+  exports.findOne = (req, res) => {
+    const id = req.params.id;
+
+  
+    User.findById(id)
+      .then(data => {
+        if (!data) {
+          return res.status(404).json({ message: "Tutorial not found with id " + id });
+        }
+        return res.status(200).json(data);
+      })
+      .catch(err => {
+        console.error(`Error retrieving Tutorial with id=${id}: ${err.message}`);
+        return res.status(500).json({ message: "Error retrieving Tutorial with id=" + id });
+      });
+  };
+
 
   exports.updateUser = async (req, res) => {
+    console.log(req.email);
     try {
       // Validate request
       if (!req.body) {
@@ -108,7 +126,6 @@ exports.createUser = async (req, res) => {
       return res.status(200).json(updatedUser);
     } catch (err) {
       // Handle errors
-      console.error(err);
       return res.status(500).json({ message: "Error occurred while updating the User." });
     }
   };
@@ -135,12 +152,12 @@ exports.createUser = async (req, res) => {
         return res.status(401).json({ message: 'Invalid password' });
       }
   
-      // Generate a JWT token
-      const token = jwt.sign({ userId: user._id, email: user.email }, secretKey, {
-        expiresIn: '1h', // Set an appropriate expiration time
-      });
+      const generateToken = Token.generateToken(user);
   
-      res.status(200).json({ token, userId: user._id, email: user.email });
+      // const generateToken = jwt.sign({ userId: user.id }, "your-secret-key", {
+      //   expiresIn: "1h",
+      // });
+      res.status(200).json({ generateToken, userId: user._id, email: user.email });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Error occurred during login' });

@@ -1,29 +1,45 @@
-const { sign, verify } = require('jsonwebtoken');
-const { genSaltSync, hashSync, compareSync } = require('bcrypt');
+const { sign, verify } = require("jsonwebtoken");
+const { genSaltSync, hashSync, compareSync } = require("bcrypt");
 // const tokenMsg = require('../msgCodes/token-msg');
 const tokenConfig = require("../config/default.json");
+const jwt = require("jsonwebtoken");
 
-const newToken = async () => {
-    //Generate Token
-    var access_token_secret_key = "";
-    var access_token_expire_time = "15m";
+const secretKey = "1234567890"; // Replace with your actual secret key
 
-    if(tokenConfig.jwtConfig.access_token_expire_time){
-        access_token_expire_time = tokenConfig.jwtConfig.access_token_expire_time;
+// Middleware to validate JWT token
+const validateToken = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).json({ message: "Token not provided" });
+  }
+
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: "Invalid token" });
     }
+    // Attach the decoded user ID to the request for later use
+    req.id = decoded.id;
+    req.email = decoded.email
+    next();
+  });
+};
 
-    if(tokenConfig.jwtConfig.access_token_secret_key){
-        access_token_secret_key = tokenConfig.jwtConfig.access_token_secret_key;
-    }
+const generateToken = (user) => {
+  const payload = {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+  };
 
-    const salt = genSaltSync(10);
-    //console.log("salt====>", salt);
+  const oneWeekInSeconds = 7 * 24 * 60 * 60; // 7 days * 24 hours * 60 minutes * 60 seconds
+  const options = {
+    expiresIn: oneWeekInSeconds, // Token expiration time set to one week
+  };
+  // Generate the token
+  const token = jwt.sign(payload, secretKey, options);
 
-    if(tokenConfig.jwtConfig.enableToken == true){
-        const accessToken = sign({"secret":salt}, access_token_secret_key, { expiresIn: access_token_expire_time });
-        console.log("access Token====>", accessToken);
-        return accessToken;
-    }else {
-        return "";
-    }
-}
+  return token;
+};
+
+module.exports = { validateToken, generateToken };
