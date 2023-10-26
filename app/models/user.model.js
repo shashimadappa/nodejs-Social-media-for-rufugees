@@ -50,11 +50,12 @@ module.exports = mongoose => {
               offeringToNetwork: String,
               lookingForNetwork: String,
               preferredLanguage: String,
-              created_at: { type: Date, default: Date.now },
-              updated_at: { type: Date, default: Date.now },
+              isActive: Boolean,
+              created_at: { type: Date  },
+              updated_at: { type: Date },
       
       },
-      { timestamps: true }
+      // { timestamps: freez }
     );
   
     schema.method("toJSON", function() {

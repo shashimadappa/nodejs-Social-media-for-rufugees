@@ -35,9 +35,6 @@ exports.createUser = async (req, res) => {
     preferredLanguage,
     created_at,
     updated_at,
-    createdAt,
-    updatedAt,
-    id
   } = req.body;
 
   // Hash the password
@@ -70,9 +67,7 @@ exports.createUser = async (req, res) => {
         preferredLanguage,
         created_at,
         updated_at,
-        createdAt,
-        updatedAt,
-        id
+        isActive: req.body.isActive ? reqbody.isActive : true
       };
 
       const newUser = new User(userData);
