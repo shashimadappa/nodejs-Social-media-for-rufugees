@@ -11,9 +11,8 @@ module.exports = app => {
     router.get("/getUserById/:id",token.validateToken, user.findOne);
     router.patch("/update/:id",token.validateToken, user.updateUser);
 
-  
-    // Retrieve all Tutorials
-    // router.get("/", tutorials.findAll);
+    router.patch("/UpdateDp/:id", token.validateToken, user.updateDp);
+    
     app.use("/api/user", router);
   
   };
