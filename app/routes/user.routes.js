@@ -12,7 +12,10 @@ module.exports = app => {
     router.patch("/update/:id",token.validateToken, user.updateUser);
 
     router.patch("/UpdateDp/:id", token.validateToken, user.updateDp);
-    
+
+    router.post("/forgotPassword", user.forgotPassword);
+    router.post("/resetForgotPassword", user.resetForgotPassword);
+
     app.use("/api/user", router);
   
   };

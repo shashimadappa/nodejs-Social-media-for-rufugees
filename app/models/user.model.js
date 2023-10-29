@@ -50,6 +50,9 @@ module.exports = mongoose => {
               offeringToNetwork: String,
               lookingForNetwork: String,
               preferredLanguage: String,
+              resetPasswordOTP:  String,
+              resetPasswordOTPExpires: Date,
+         
               isActive: Boolean,
               created_at: { type: Date  },
               updated_at: { type: Date },
