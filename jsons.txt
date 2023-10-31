@@ -1,0 +1,43 @@
+{
+  "email": "exampleuser@example.com",
+  "username": "exampleuser123",
+  "password": "hashedpassword",
+  "number": "123-456-7890",
+  "referenceEmail": "reference@example.com",
+  "displayPicture": "path/to/display_picture.jpg",
+  "role": "User",
+  "gender": "Male",
+  "location": {
+    "city": "New York",
+    "state": "NY",
+    "country": "USA"
+  },
+  "tags": ["tag1", "tag2", "tag3"],
+  "mission": "To make the world a better place",
+  "occupation": "Software Engineer",
+  "organization": "Example Inc",
+  "experience": [
+    {
+      "title": "Software Engineer",
+      "company": "Tech Company",
+      "start_date": "2020-01-01",
+      "end_date": "2022-12-31",
+      "description": "Developed web applications."
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Science",
+      "major": "Computer Science",
+      "university": "Example University",
+      "graduation_year": 2019
+    }
+  ],
+  "skills": ["JavaScript", "Node.js", "React", "MongoDB"],
+  "offeringToNetwork": "Seeking collaboration on web development projects.",
+  "lookingForNetwork": "Interested in networking with fellow developers.",
+  "preferredLanguage": "English",
+  "isActive": true,
+  "created_at": "2023-10-25T12:00:00.000Z",
+  "updated_at": "2023-10-25T15:30:00.000Z"
+}

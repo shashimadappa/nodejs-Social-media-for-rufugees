@@ -71,26 +71,8 @@ exports.createUser = async (req, res) => {
   // Get the data from the request body
   const {
     email,
-    username,
-    displayPicture,
     password,
-    number,
     referenceEmail,
-    role,
-    gender,
-    location,
-    tags,
-    mission,
-    occupation,
-    organization,
-    experience,
-    education,
-    skills,
-    offeringToNetwork,
-    lookingForNetwork,
-    preferredLanguage,
-    created_at,
-    updated_at,
   } = req.body;
 
   // Hash the password
@@ -103,28 +85,33 @@ exports.createUser = async (req, res) => {
       // Create a new User object with the hashed password and other fields
       const userData = {
         email,
-        username,
-        displayPicture,
+        username: req.body.username || "",
+        displayPicture: req.body.displayPicture || "",
         password: hashedPassword,
-        number,
+        number: req.body.number || "",
         referenceEmail,
-        role,
-        gender,
-        location,
-        tags,
-        mission,
-        occupation,
-        organization,
-        experience,
-        education,
-        skills,
-        offeringToNetwork,
-        lookingForNetwork,
-        preferredLanguage,
-        created_at,
-        updated_at,
-        isActive: req.body.isActive ? req.isActive : true,
+        role: req.body.role || "",
+        gender: req.body.gender || "",
+        location: req.body.location || {
+          city: "",
+          state: "",
+          country: ""
+        },
+        tags: req.body.tags || [],
+        mission: req.body.mission || "",
+        occupation: req.body.occupation || "",
+        organization: req.body.organization || "",
+        experience: req.body.experience || [],
+        education: req.body.education || [],
+        skills: req.body.skills || [],
+        offeringToNetwork: req.body.offeringToNetwork || "",
+        lookingForNetwork: req.body.lookingForNetwork || "",
+        preferredLanguage: req.body.preferredLanguage || "",
+        created_at: req.body.created_at || "",
+        updated_at: req.body.updated_at || "",
+        isActive: req.body.isActive || true,
       };
+      
 
       const newUser = new User(userData);
 
@@ -222,7 +209,7 @@ exports.login = async (req, res) => {
 
     res
       .status(200)
-      .json({ generateToken, userId: user._id, email: user.email });
+      .json({ generateToken, userId: user._id, email: user.email, username : user.username, displayPicture: user.displayPicture });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error occurred during login" });
