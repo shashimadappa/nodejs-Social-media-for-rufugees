@@ -17,7 +17,10 @@ module.exports = mongoose => {
               },
               number: String,
               referenceEmail: String,
-              displayPicture : String,
+              displayPicture: {
+                public_id: String,
+                secure_url: String,
+              },
               role: String,
               gender: String,
               location: {

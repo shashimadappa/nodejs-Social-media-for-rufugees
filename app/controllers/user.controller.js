@@ -6,61 +6,115 @@ const multer = require("multer");
 const path = require("path");
 const sendEmail = require('../utils/sendEmail')
 const Token = require("../auth/token");
+const cloudinary = require('cloudinary').v2;
+const  cloudinaryConfig = require('../config/cloud')
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Files will be saved in the "uploads" directory
-  },
-  filename: (req, file, cb) => {
-    const fileExtension = path.extname(file.originalname);
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `${uniqueSuffix}${fileExtension}`);
-  },
-});
+cloudinary.config(cloudinaryConfig);
 
+// Configure Multer for file uploads
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
+
 exports.updateDp = async (req, res) => {
-  const id = req.params.id;
-
   try {
-    upload.single("file")(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: "File upload failed" });
+    const id = req.params.id;
+
+    // Handle file upload
+    upload.single('file')(req, res, async (err) => {
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({ error: 'File upload error', message: err.message });
+      } else if (err) {
+        return res.status(500).json({ error: 'Internal server error', message: err.message });
       }
+      const folder = 'displayPicture'; 
+      // Upload the file to Cloudinary
+      cloudinary.uploader.upload_stream({ resource_type: 'auto', folder: folder }, async (error, result) => {
+        if (error) {
+          return res.status(500).json({ error: 'Upload failed', message: error.message });
+        }
 
-      if (!req.file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-
-      const filePath = req.file.path;
-
-      try {
-        // Update the user's displayPicture field in the database
+        // Update the user's display picture in the database
+        const filePath = result.secure_url;
+        const { public_id, secure_url } = result;
         const updatedUser = await User.findByIdAndUpdate(
           id,
-          { displayPicture: filePath },
+          {
+          displayPicture: {
+            public_id,
+            secure_url,
+          }
+        },
           { new: true }
         );
 
         if (!updatedUser) {
-          return res
-            .status(404)
-            .json({ message: `User with ID ${id} not found.` });
+          return res.status(404).json({ message: `User with ID ${id} not found.` });
         }
 
-        res
-          .status(200)
-          .json({ message: "File uploaded and path saved successfully" });
-      } catch (error) {
-        res
-          .status(500)
-          .json({ message: "Error updating user in the database" });
-      }
+        // File uploaded and user updated successfully
+        res.json({ public_id: result.public_id, url: result.secure_url, user: updatedUser });
+      }).end(req.file.buffer);
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ error: 'Internal server error', message: error.message });
   }
 };
+
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads/"); // Files will be saved in the "uploads" directory
+//   },
+//   filename: (req, file, cb) => {
+//     const fileExtension = path.extname(file.originalname);
+//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+//     cb(null, `${uniqueSuffix}${fileExtension}`);
+//   },
+// });
+
+// const upload = multer({ storage: storage });
+// exports.updateDp = async (req, res) => {
+//   const id = req.params.id;
+
+//   try {
+//     upload.single("file")(req, res, async (err) => {
+//       if (err) {
+//         return res.status(400).json({ message: "File upload failed" });
+//       }
+
+//       if (!req.file) {
+//         return res.status(400).json({ message: "No file uploaded" });
+//       }
+
+//       const filePath = req.file.path;
+
+//       try {
+//         // Update the user's displayPicture field in the database
+//         const updatedUser = await User.findByIdAndUpdate(
+//           id,
+//           { displayPicture: filePath },
+//           { new: true }
+//         );
+
+//         if (!updatedUser) {
+//           return res
+//             .status(404)
+//             .json({ message: `User with ID ${id} not found.` });
+//         }
+
+//         res
+//           .status(200)
+//           .json({ message: "File uploaded and path saved successfully" });
+//       } catch (error) {
+//         res
+//           .status(500)
+//           .json({ message: "Error updating user in the database" });
+//       }
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
 
 exports.createUser = async (req, res) => {
   if (!req.body) {
