@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
-
+const sendEmail = require('../utils/sendEmail')
 const Token = require("../auth/token");
 
 const storage = multer.diskStorage({
@@ -221,24 +221,27 @@ exports.login = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-
-    // Check if the email exists in your database
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    // Generate a random OTP (6 digits in this example)
     const random6DigitNumber = Math.floor(100000 + Math.random() * 900000);
 
-    // Save the OTP and its expiration time in the user's document
     const otpExpiration = new Date();
     otpExpiration.setMinutes(otpExpiration.getMinutes() + 15); // OTP expires in 15 minutes
     user.resetPasswordOTP = random6DigitNumber;
     user.resetPasswordOTPExpires = otpExpiration;
 
     await user.save();
+
+    sendEmail({
+      to:  [
+        user.email
+      ], // Replace with the recipient's email address
+      subject: "OTP for password change AWON",
+      html: random6DigitNumber,
+    });
 
     res.status(200).json({ message: "OTP sent to the user's email" });
     
