@@ -4,7 +4,6 @@ module.exports = app => {
     var router = require("express").Router();
     const token = require("../../app/auth/token");
   
-    // Create a new Tutorial
     router.post("/create-user", user.createUser);
     router.post("/login", user.login);
 

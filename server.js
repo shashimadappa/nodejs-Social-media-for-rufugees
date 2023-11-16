@@ -34,8 +34,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to awon application." });
 });
 
-require("./app/routes/turorial.routes")(app);
+
+// require("./app/routes/turorial.routes")(app);
 require("./app/routes/user.routes")(app);
+require("./app/routes/post.routes")(app);
 
 
 // set port, listen for requests
