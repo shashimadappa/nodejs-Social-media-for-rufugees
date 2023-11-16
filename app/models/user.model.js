@@ -46,7 +46,7 @@ module.exports = mongoose => {
                   degree: String,
                   major: String,
                   university: String,
-                  graduation_year: Number,
+                  graduation_year: Date,
                 },
               ],
               skills: [String],

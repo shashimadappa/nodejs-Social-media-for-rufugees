@@ -1,5 +1,5 @@
 module.exports = app => {
-    const Post = require("../controllers/post.controller");
+    const comment = require("../controllers/comment.controller");
   
     var router = require("express").Router();
     const token = require("../../app/auth/token");
@@ -10,11 +10,10 @@ module.exports = app => {
     // router.patch("/UpdateDp/:id", token.validateToken, user.updateDp);
 
     // router.post("/forgotPassword", user.forgotPassword);
-    router.post("/", token.validateToken, Post.createPost );
-    router.get("/:id",token.validateToken, Post.getAllById);
-    router.post("/likePost/:postId",token.validateToken, Post.likePost);
+    router.post("/", token.validateToken, comment.createComment );
+    // router.post("/like-comment/:CommentId", token.validateToken, comment.likeComment);
 
-    app.use("/api/post", router);
+    app.use("/api/comment", router);
   
   };
   

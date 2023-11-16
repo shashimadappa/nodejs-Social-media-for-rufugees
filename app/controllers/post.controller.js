@@ -56,8 +56,8 @@ exports.createPost = async (req, res) => {
 
         // Create a new post object with the required data
         const newPost = new post({
-          // authorId: "653b66225652f73ae41252bd",
-          authorId: authorId,
+          authorId: "653b66225652f73ae41252bd",
+          // authorId: authorId,
           content: content,
           tags: tags,
           media: uploadResults,
@@ -126,3 +126,39 @@ exports.getAllById = async (req, res) => {
       });
   
 };
+
+  exports.likePost = async (req, res) => {
+    try {
+      const { postId } = req.params;
+      const userId = req.id; // Assuming user information is attached to the request
+  
+      // Find the post by its ID
+      const post2 = await post.findById(postId);
+      // console.log(post2)
+  
+      if (!post2) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+  
+      // Check if the user has already liked the post
+      const existingLike = post2.likes.find((like) => like.equals(userId));
+      console.log(existingLike)
+      // If the user already liked the post, remove the like (dislike)
+      if (existingLike) {
+        post2.likes = post2.likes.filter((like) => !like.equals(userId));
+      } else {
+        // If the user has not liked the post, add the like
+        post2.likes.push(userId);
+        console.log(post2);
+      }
+  
+      // Save the updated post with the new like/dislike
+      const updatedPost = await post2.save();
+  
+      // Respond with the updated post
+      res.json(updatedPost);
+    } catch (error) {
+      // Handle errors
+      res.status(500).json({ error: error.message });
+    }
+    };

@@ -61,61 +61,6 @@ exports.updateDp = async (req, res) => {
   }
 };
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/"); // Files will be saved in the "uploads" directory
-//   },
-//   filename: (req, file, cb) => {
-//     const fileExtension = path.extname(file.originalname);
-//     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-//     cb(null, `${uniqueSuffix}${fileExtension}`);
-//   },
-// });
-
-// const upload = multer({ storage: storage });
-// exports.updateDp = async (req, res) => {
-//   const id = req.params.id;
-
-//   try {
-//     upload.single("file")(req, res, async (err) => {
-//       if (err) {
-//         return res.status(400).json({ message: "File upload failed" });
-//       }
-
-//       if (!req.file) {
-//         return res.status(400).json({ message: "No file uploaded" });
-//       }
-
-//       const filePath = req.file.path;
-
-//       try {
-//         // Update the user's displayPicture field in the database
-//         const updatedUser = await User.findByIdAndUpdate(
-//           id,
-//           { displayPicture: filePath },
-//           { new: true }
-//         );
-
-//         if (!updatedUser) {
-//           return res
-//             .status(404)
-//             .json({ message: `User with ID ${id} not found.` });
-//         }
-
-//         res
-//           .status(200)
-//           .json({ message: "File uploaded and path saved successfully" });
-//       } catch (error) {
-//         res
-//           .status(500)
-//           .json({ message: "Error updating user in the database" });
-//       }
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
 exports.createUser = async (req, res) => {
   if (!req.body) {
     res.status(400).send({ message: "Content can not be empty!" });
@@ -128,6 +73,12 @@ exports.createUser = async (req, res) => {
     password,
     referenceEmail,
   } = req.body;
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser.email) {
+    // Email is already registered
+    return res.status(409).send({ message: "Email is already registered." });
+  }
 
   // Hash the password
   bcrypt.hash(password, 10, (err, hashedPassword) => {
