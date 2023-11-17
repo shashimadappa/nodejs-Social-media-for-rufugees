@@ -20,6 +20,27 @@ exports.updateDp = async (req, res) => {
   try {
     const id = req.params.id;
 
+
+    const user = await User.findById(id);
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ message: `User with ID ${id} not found.` });
+    }
+
+    // Check if there is an existing display picture
+    if (user.displayPicture && user.displayPicture.public_id) {
+      // Delete the existing display picture from Cloudinary
+      try {
+        await cloudinary.uploader.destroy(user.displayPicture.public_id);
+      } catch (deleteError) {
+        console.error(deleteError);
+        return res.status(500).json({ error: 'Error deleting existing display picture', message: deleteError.message });
+      }
+    }
+
+
+
     // Handle file upload
     upload.single('file')(req, res, async (err) => {
       if (err instanceof multer.MulterError) {
