@@ -16,8 +16,9 @@ module.exports = (mongoose) => {
       likes: [
         {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "like",
-        },
+          // ref: "like",
+          ref: "user",
+          },
       ],
       comments: [
         {

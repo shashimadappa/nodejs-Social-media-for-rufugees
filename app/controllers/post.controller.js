@@ -80,6 +80,91 @@ exports.createPost = async (req, res) => {
   }
 };
 
+exports.likePost = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const userId = req.id; // Assuming user information is attached to the request
+
+    // Find the post by its ID
+    const post2 = await post.findById(postId);
+    // console.log(post2)
+
+    if (!post2) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Check if the user has already liked the post
+    const existingLike = post2.likes.find((like) => like.equals(userId));
+    console.log(existingLike)
+    // If the user already liked the post, remove the like (dislike)
+    if (existingLike) {
+      post2.likes = post2.likes.filter((like) => !like.equals(userId));
+    } else {
+      // If the user has not liked the post, add the like
+      post2.likes.push(userId);
+      console.log(post2);
+    }
+
+    // Save the updated post with the new like/dislike
+    const updatedPost = await post2.save();
+
+    // Respond with the updated post
+    res.json(updatedPost);
+  } catch (error) {
+    // Handle errors
+    res.status(500).json({ error: error.message });
+  }
+  };
+
+
+exports.findAll = async (req, res) => {
+  try {
+    // Fetch all posts
+    const allPosts = await post.find();
+
+    res.json(allPosts);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+
+};
+
+
+
+// Delete a post by ID
+exports.deletePost = async (req, res) => {
+  const postId = req.params.postId;
+
+  try {
+    // Find the post by ID
+    const postData = await post.findById(postId);
+
+    // Check if the post exists
+    if (!postData) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+    await postData.remove();
+
+    postData.media.forEach(async (media) => {
+      try {
+        // Use the provided public ID (key) to delete the media file from Cloudinary
+        await cloudinary.uploader.destroy(media.key);
+
+        // Alternatively, you can use the URL to delete the media file:
+        // await cloudinary.uploader.destroy(media.url);
+      } catch (deleteError) {
+        console.error(deleteError);
+        // Handle any errors that occur during media deletion
+      }
+    });
+
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 exports.findOne = (req, res) => {
     const id = req.params.id;
@@ -126,39 +211,3 @@ exports.getAllById = async (req, res) => {
       });
   
 };
-
-  exports.likePost = async (req, res) => {
-    try {
-      const { postId } = req.params;
-      const userId = req.id; // Assuming user information is attached to the request
-  
-      // Find the post by its ID
-      const post2 = await post.findById(postId);
-      // console.log(post2)
-  
-      if (!post2) {
-        return res.status(404).json({ error: 'Post not found' });
-      }
-  
-      // Check if the user has already liked the post
-      const existingLike = post2.likes.find((like) => like.equals(userId));
-      console.log(existingLike)
-      // If the user already liked the post, remove the like (dislike)
-      if (existingLike) {
-        post2.likes = post2.likes.filter((like) => !like.equals(userId));
-      } else {
-        // If the user has not liked the post, add the like
-        post2.likes.push(userId);
-        console.log(post2);
-      }
-  
-      // Save the updated post with the new like/dislike
-      const updatedPost = await post2.save();
-  
-      // Respond with the updated post
-      res.json(updatedPost);
-    } catch (error) {
-      // Handle errors
-      res.status(500).json({ error: error.message });
-    }
-    };
