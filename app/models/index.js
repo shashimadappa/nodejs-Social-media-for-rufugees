@@ -13,5 +13,6 @@ db.users = require("./user.model.js")(mongoose);
 db.post = require("./post.model.js")(mongoose);
 db.comment = require("./comments.model.js")(mongoose);
 // db.message = require("./message.model.js")(mongoose);
+db.funds = require("./funds&grants.model.js")(mongoose);
 
 module.exports = db;
