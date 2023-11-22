@@ -41,3 +41,42 @@
   "created_at": "2023-10-25T12:00:00.000Z",
   "updated_at": "2023-10-25T15:30:00.000Z"
 }
+
+
+├── app
+|   ├── controllers
+|   |   └── messageController.js
+|   ├── models
+|   |   └── messageModel.js
+|   ├── routes
+|   |   └── messageRoutes.js
+|   ├── utils
+|   |   └── socket.js
+├── server.js
+
+
+// User collection
+{
+  _id: ObjectId("user_id"),
+  username: String,
+  email: String,
+  password: String,
+  // Other user-related fields
+}
+
+// Conversation collection
+{
+  _id: ObjectId("conversation_id"),
+  participants: [ObjectId("user_id_1"), ObjectId("user_id_2")],
+  // Other conversation-related fields
+}
+
+// Message collection
+{
+  _id: ObjectId("message_id"),
+  conversationId: ObjectId("conversation_id"),
+  senderId: ObjectId("user_id"),
+  content: String,
+  timestamp: Date,
+  // Other message-related fields
+}
