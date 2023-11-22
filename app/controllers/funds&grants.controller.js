@@ -2,9 +2,9 @@ const db = require("../models");
 const fundsTbl = db.funds;
 
 exports.createFunds = async (req, res) => {
-    const { authorId,content } = req.body;
+    const { authorId,title, category , discription, tags, url, location, applicationDeadline } = req.body;
   
-    if (!authorId || !content) {
+    if (!authorId || !title) {
       return res.status(400).json({
         message: " authorId, content or postId not found",
       });
@@ -13,8 +13,7 @@ exports.createFunds = async (req, res) => {
     try {
       // Create a new comment instance
       const fundsData = new fundsTbl({
-        authorId,
-        content
+        authorId, title, category, discription, tags, url, location, applicationDeadline
       });
   
       // Save the comment to the database

@@ -66,36 +66,36 @@ exports.replyComment = async (req, res) => {
   };
 
 
-  exports.createComment = async (req, res) => {
-    const { authorId, postId, comment, timestamp, likes, replies } = req.body;
+  // exports.createComment = async (req, res) => {
+  //   const { authorId, postId, comment, timestamp, likes, replies } = req.body;
   
-    if (!authorId || !postId || !comment) {
-      return res.status(400).json({
-        message: " authorId, content or postId not found",
-      });
-    };
-  //    const userId = req.id;
-    try {
-      // Create a new comment instance
-      const newComment = new commentTbl({
-        authorId,
-        postId,
-        comment,
-        timestamp,
-        likes,
-        replies,
-      });
+  //   if (!authorId || !postId || !comment) {
+  //     return res.status(400).json({
+  //       message: " authorId, content or postId not found",
+  //     });
+  //   };
+  // //    const userId = req.id;
+  //   try {
+  //     // Create a new comment instance
+  //     const newComment = new commentTbl({
+  //       authorId,
+  //       postId,
+  //       comment,
+  //       timestamp,
+  //       likes,
+  //       replies,
+  //     });
   
-      // Save the comment to the database
-      const savedComment = await newComment.save();
+  //     // Save the comment to the database
+  //     const savedComment = await newComment.save();
   
-      // Respond with the saved comment
-      res.json(savedComment);
-    } catch (error) {
-      // Handle errors
-      res.status(500).json({ error: error.message });
-    }
-  };
+  //     // Respond with the saved comment
+  //     res.json(savedComment);
+  //   } catch (error) {
+  //     // Handle errors
+  //     res.status(500).json({ error: error.message });
+  //   }
+  // };
 
   
 //   exports.likeComment = async (req, res) => {

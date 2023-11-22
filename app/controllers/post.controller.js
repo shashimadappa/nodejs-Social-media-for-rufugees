@@ -50,7 +50,7 @@ exports.createPost = async (req, res) => {
 
           // Create a new post object with the required data
           const newPost = new post({
-            authorId: "653b66225652f73ae41252bd", // Assuming this ID is constant for this example
+            authorId: authorId, // Assuming this ID is constant for this example
             content: content,
             tags: tags,
             media: uploadResults,
@@ -74,7 +74,7 @@ exports.createPost = async (req, res) => {
     // If no files, create a new post without media
     try {
       const newPost = new post({
-        authorId: "653b66225652f73ae41252bd", // Assuming this ID is constant for this example
+        authorId: authorId, // Assuming this ID is constant for this example
         content: content,
         tags: tags,
         media: [],
