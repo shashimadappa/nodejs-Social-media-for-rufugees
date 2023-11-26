@@ -1,9 +1,11 @@
 const db = require("../models");
 const post = db.post;
+const userTbl = db.users
 
 const multer = require("multer");
 const cloudinary = require('cloudinary').v2;
-const  cloudinaryConfig = require('../config/cloud')
+const  cloudinaryConfig = require('../config/cloud');
+const userModel = require("../models/user.model");
 cloudinary.config(cloudinaryConfig);
 
 const storage = multer.memoryStorage();
@@ -11,6 +13,11 @@ const upload = multer({ storage: storage });
 
 exports.createPost = async (req, res) => {
   const { authorId, content, media, tags } = req.body;
+
+  if (!authorId) {
+    return res.status(404).json({ error: 'Post not found' });
+  }
+
   
   // Check if there are files in the request
   if (req.files && req.files.length > 0) {
@@ -192,20 +199,71 @@ exports.likePost = async (req, res) => {
   }
   };
 
-    exports.findAll = async (req, res) => {
-      try {
-        // Pagination logic: Get 10 posts at a time
-        const page = parseInt(req.query.page) || 2;
-        const limit = 1;
-        const skip = (page - 1) * limit;
-    
-        const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
-        res.json(posts);
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-      }
+  exports.findAll = async (req, res) => {
+    try {
+      // Pagination logic: Get 10 posts at a time
+      const page = parseInt(req.query.page) || 1;
+      const limit = 3;
+      const skip = (page - 1) * limit;
+  
+      const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
+  
+      const finalArray = posts.map(async (post) => {
+        const authorId = post.authorId;
+        const userData = await userTbl.findOne({ _id: authorId });
+  
+        // Embed user data within each post object
+        return {
+          _id: post._id,
+          media: post.media,
+          likes: post.likes,
+          content: post.content,
+          // comments: post.comments,
+          tags: post.tags,
+          isActive: post.isActive,
+          createdAt: post.createdAt,
+          user: {
+            _id: userData._id,
+            username: userData.username, 
+            // Include other user fields as needed
+            // Add more fields as needed
+          },
+        };
+      });
+  
+      // Wait for all promises to resolve
+      const combinedDataArray = await Promise.all(finalArray);
+  
+      res.json(combinedDataArray);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   };
+  
+
+  //   exports.findAll = async (req, res) => {
+  //     try {
+  //       // Pagination logic: Get 10 posts at a time
+  //       const page = parseInt(req.query.page) || 1;
+  //       const limit = 3;
+  //       const skip = (page - 1) * limit;
+  //       finalArray = [];
+
+  //       const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
+  //       finalArray.push(posts)
+  //       const authorIds = posts.map(post => post.authorId);
+  //       for(const authorId of authorIds){
+  //         const userData = await userTbl.findOne({_id : authorId});
+  //         console.log(userData);
+  //         finalArray.push(userData);
+  //       }
+  //       res.json(finalArray);
+  //     } catch (error) {
+  //       console.error(error);
+  //       res.status(500).json({ error: 'Internal Server Error' });
+  //     }
+  // };
 
 
   // exports.findAll = async (req, res) => {

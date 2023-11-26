@@ -24,7 +24,7 @@ module.exports = (mongoose) => {
         {
           type: mongoose.Schema.Types.ObjectId,
 
-          ref: "Comment",
+          ref: "comment",
         },
       ],
       tags: [String],
