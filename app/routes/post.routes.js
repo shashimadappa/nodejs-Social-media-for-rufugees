@@ -13,6 +13,7 @@ module.exports = app => {
 
     router.get("/:id",token.validateToken, Post.getAllById);
     router.post("/likePost/:postId",token.validateToken, Post.likePost);
+    router.get("/numberOfLikes/:postId",token.validateToken, Post.getNoOfLikes);
 
     app.use("/api/post", router);
   

@@ -381,3 +381,22 @@ exports.getAllById = async (req, res) => {
       });
   
 };
+
+exports.getNoOfLikes = async (req, res) => {
+  try {
+    const {postId } = req.params;
+    console.log(postId);
+    const media = await post.findById(postId);
+
+    if (!media) {
+      return res.status(404).json({ error: 'Media not found' });
+    }
+
+    const likeCount = media.likes.length;
+
+    res.json({ likeCount });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
