@@ -199,11 +199,53 @@ exports.likePost = async (req, res) => {
   }
   };
 
+  // exports.findAll = async (req, res) => {
+  //   try {
+  //     // Pagination logic: Get 10 posts at a time
+  //     const page = parseInt(req.query.page) || 1;
+  //     const limit = 3;
+  //     const skip = (page - 1) * limit;
+  
+  //     const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
+  
+  //     const finalArray = posts.map(async (post) => {
+  //       const authorId = post.authorId;
+  //       const userData = await userTbl.findOne({ _id: authorId });
+  
+  //       // Embed user data within each post object
+  //       return {
+  //         _id: post._id,
+  //         media: post.media,
+  //         likes: post.likes,
+  //         content: post.content,
+  //         // comments: post.comments,
+  //         tags: post.tags,
+  //         isActive: post.isActive,
+  //         createdAt: post.createdAt,
+  //         user: {
+  //           _id: userData._id,
+  //           username: userData.username, 
+  //           // Include other user fields as needed
+  //           // Add more fields as needed
+  //         },
+  //       };
+  //     });
+  
+  //     // Wait for all promises to resolve
+  //     const combinedDataArray = await Promise.all(finalArray);
+  
+  //     res.json(combinedDataArray);
+  //   } catch (error) {
+  //     console.error(error);
+  //     res.status(500).json({ error: 'Internal Server Error' });
+  //   }
+  // };
+  
   exports.findAll = async (req, res) => {
     try {
-      // Pagination logic: Get 10 posts at a time
+      // Updated pagination logic: Get posts based on URI parameters
       const page = parseInt(req.query.page) || 1;
-      const limit = 3;
+      const limit = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * limit;
   
       const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
@@ -218,13 +260,12 @@ exports.likePost = async (req, res) => {
           media: post.media,
           likes: post.likes,
           content: post.content,
-          // comments: post.comments,
           tags: post.tags,
           isActive: post.isActive,
           createdAt: post.createdAt,
           user: {
             _id: userData._id,
-            username: userData.username, 
+            username: userData.username,
             // Include other user fields as needed
             // Add more fields as needed
           },
@@ -241,65 +282,6 @@ exports.likePost = async (req, res) => {
     }
   };
   
-
-  //   exports.findAll = async (req, res) => {
-  //     try {
-  //       // Pagination logic: Get 10 posts at a time
-  //       const page = parseInt(req.query.page) || 1;
-  //       const limit = 3;
-  //       const skip = (page - 1) * limit;
-  //       finalArray = [];
-
-  //       const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
-  //       finalArray.push(posts)
-  //       const authorIds = posts.map(post => post.authorId);
-  //       for(const authorId of authorIds){
-  //         const userData = await userTbl.findOne({_id : authorId});
-  //         console.log(userData);
-  //         finalArray.push(userData);
-  //       }
-  //       res.json(finalArray);
-  //     } catch (error) {
-  //       console.error(error);
-  //       res.status(500).json({ error: 'Internal Server Error' });
-  //     }
-  // };
-
-
-  // exports.findAll = async (req, res) => {
-  //   try {
-  //     const page = parseInt(req.query.page) || 1;
-  //     const pageSize = 4;
-  //     const skip = (page - 1) * pageSize;
-  
-  //     const [latestPost, posts] = await Promise.all([
-  //       getLatestPost(),
-  //       getPosts(skip, pageSize)
-  //     ]);
-  
-  //     res.json({ latestPost, posts });
-  //   } catch (error) {
-  //     console.error('Error fetching posts:', error);
-  //     res.status(500).send('Internal Server Error');
-  //   }
-  // };
-
-  // async function getLatestPost() {
-  //   const latestPost = await post.findOne({}, { sort: { createdAt: -1 } });
-  //   return latestPost;
-  // }
-  
-  // async function getPosts(skip = 0, limit = 10) {
-  //   const posts = await post.find({})
-  //     .sort({ createdAt: -1 })
-  //     .skip(skip)
-  //     .limit(limit)
-  //    // .toArray(); // This is not needed, as `find` in MongoDB driver returns a cursor
-  
-  //   return posts;
-  // }
-
-
 
 
 // Delete a post by ID
