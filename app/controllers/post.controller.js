@@ -95,151 +95,33 @@ exports.createPost = async (req, res) => {
   }
 };
 
-
-// exports.createPost = async (req, res) => {
-//   const { authorId, content, media, tags } = req.body;
-// if(req.files){
-
-// }
-//   try {
-//     // Handle file upload
-//     upload.array('files', 5)(req, res, async (err) => {
-//       if (err instanceof multer.MulterError) {
-//         return res.status(400).json({ error: 'File upload error', message: err.message });
-//       } else if (err) {
-//         return res.status(500).json({ error: 'Internal server error', message: err.message });
-//       }
-
-//       const folder = 'postMedia';
-//       const uploadResults = [];
-
-//       // Upload each file to Cloudinary
-//       const uploadPromises = req.files.map(file => {
-//         return new Promise((resolve, reject) => {
-//           cloudinary.uploader.upload_stream({ resource_type: 'auto', folder: folder }, (error, result) => {
-//             if (error) {
-//               reject({ error: 'Upload failed', message: error.message });
-//             } else {
-//               const media = {
-//                  url : result.secure_url,
-//                  key : result.public_id
-//               }
-//             // const url =  result.secure_url
-//             // const key = result.public_id
-//               uploadResults.push(media);
-              
-//               resolve();
-//             }
-//           }).end(file.buffer);
-//         });
-//       });
-
-//       try {
-//         await Promise.all(uploadPromises);
-
-//         // Create a new post object with the required data
-//         const newPost = new post({
-//           authorId: "653b66225652f73ae41252bd",
-//           // authorId: authorId,
-//           content: content,
-//           tags: tags,
-//           media: uploadResults,
-//         });
-//         await newPost.save();
-
-//         res.json(newPost);
-//       } catch (uploadError) {
-//         // Rollback: Delete uploaded files on Cloudinary if there's an error saving to the database
-//         uploadResults.forEach(async (data) => {
-//           // console.log('url'.url);
-//           await cloudinary.uploader.destroy(data.url); // Assumes the Cloudinary URLs are the public IDs
-//         });
-
-//         return res.status(500).json({ error: 'Error processing files', message: uploadError.message });
-//       }
-//     });
-//   } catch (error) {
-//     return res.status(500).json({ error: 'Internal server error', message: error.message });
-//   }
-// };
-
 exports.likePost = async (req, res) => {
   try {
     const { postId } = req.params;
     const userId = req.id; // Assuming user information is attached to the request
 
-    // Find the post by its ID
     const post2 = await post.findById(postId);
-    // console.log(post2)
 
     if (!post2) {
       return res.status(404).json({ error: 'Post not found' });
     }
-
-    // Check if the user has already liked the post
     const existingLike = post2.likes.find((like) => like.equals(userId));
-    console.log(existingLike)
     // If the user already liked the post, remove the like (dislike)
     if (existingLike) {
       post2.likes = post2.likes.filter((like) => !like.equals(userId));
     } else {
       // If the user has not liked the post, add the like
       post2.likes.push(userId);
-      console.log(post2);
+
     }
 
-    // Save the updated post with the new like/dislike
     const updatedPost = await post2.save();
 
-    // Respond with the updated post
     res.json(updatedPost);
   } catch (error) {
-    // Handle errors
     res.status(500).json({ error: error.message });
   }
   };
-
-  // exports.findAll = async (req, res) => {
-  //   try {
-  //     // Pagination logic: Get 10 posts at a time
-  //     const page = parseInt(req.query.page) || 1;
-  //     const limit = 3;
-  //     const skip = (page - 1) * limit;
-  
-  //     const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
-  
-  //     const finalArray = posts.map(async (post) => {
-  //       const authorId = post.authorId;
-  //       const userData = await userTbl.findOne({ _id: authorId });
-  
-  //       // Embed user data within each post object
-  //       return {
-  //         _id: post._id,
-  //         media: post.media,
-  //         likes: post.likes,
-  //         content: post.content,
-  //         // comments: post.comments,
-  //         tags: post.tags,
-  //         isActive: post.isActive,
-  //         createdAt: post.createdAt,
-  //         user: {
-  //           _id: userData._id,
-  //           username: userData.username, 
-  //           // Include other user fields as needed
-  //           // Add more fields as needed
-  //         },
-  //       };
-  //     });
-  
-  //     // Wait for all promises to resolve
-  //     const combinedDataArray = await Promise.all(finalArray);
-  
-  //     res.json(combinedDataArray);
-  //   } catch (error) {
-  //     console.error(error);
-  //     res.status(500).json({ error: 'Internal Server Error' });
-  //   }
-  // };
   
   exports.findAll = async (req, res) => {
     try {
@@ -320,7 +202,7 @@ exports.deletePost = async (req, res) => {
 
 exports.findOne = (req, res) => {
     const id = req.params.id;
-    console.log(id);
+
     if (!id) {
         return res.status(400).json({
           message: "Invalid post data",
@@ -343,7 +225,6 @@ exports.findOne = (req, res) => {
 
 exports.getAllById = async (req, res) => {
     const id = req.params.id;
-    console.log(id);
     if (!id) {
         return res.status(400).json({
           message: "User not found",
@@ -367,7 +248,7 @@ exports.getAllById = async (req, res) => {
 exports.getNoOfLikes = async (req, res) => {
   try {
     const {postId } = req.params;
-    console.log(postId);
+  
     const media = await post.findById(postId);
 
     if (!media) {

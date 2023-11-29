@@ -178,7 +178,7 @@ exports.findOne = (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-  console.log(req.email);
+
   try {
     // Validate request
     if (!req.body) {
@@ -237,7 +237,6 @@ exports.login = async (req, res) => {
       .status(200)
       .json({ generateToken, userId: user._id, email: user.email, username : user.username, displayPicture: user.displayPicture });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ message: "Error occurred during login" });
   }
 };
@@ -291,8 +290,7 @@ exports.resetForgotPassword = async (req, res) => {
 
     // Verify the OTP
     if (user.resetPasswordOTP !== otp || user.resetPasswordOTPExpires < Date.now()) {
-      console.log(user.resetPasswordOTP);
-      console.log(otp);
+
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
