@@ -191,6 +191,8 @@ exports.likePost = async (req, res) => {
             user: {
               _id: userData._id,
               username: userData.username,
+              picture: userData.displayPicture.secure_url,
+              occupation: userData.occupation,
               // Include other user fields as needed
               // Add more fields as needed
             },
