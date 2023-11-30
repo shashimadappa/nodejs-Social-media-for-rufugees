@@ -32,11 +32,11 @@ module.exports = (mongoose) => {
         type: Boolean,
         default: true,
       },
-      created_at: {
+      createdAt: {
         type: Date,
     
       },
-      updated_at: {
+      updatedAt: {
         type: Date,
    
       },

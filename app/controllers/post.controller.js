@@ -11,24 +11,64 @@ cloudinary.config(cloudinaryConfig);
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+// Function to upload image to Cloudinary
+const uploadImageToCloudinary = (file) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(result);
+      }
+    }).end(file.buffer);
+  });
+};
+
+exports.createPost2 = async (req, res) => {
+  try {
+    // Construct post data
+    const postData = {
+      authorId: req.params.userId,
+      content: req.body.content,
+      tags: req.body.tags,
+    };
+
+    // Check if images are provided
+    if (req.files && req.files.length > 0) {
+      // Upload each image to Cloudinary
+      const cloudinaryResults = await Promise.all(
+        req.files.map(async (file) => uploadImageToCloudinary(file))
+      );
+
+      // Add Cloudinary image URLs to post data
+      postData.imageUrls = cloudinaryResults.map(result => result.secure_url);
+    }
+
+    console.log(postData);
+
+    // Use your Post model to create a post with the provided data
+    const createdPost = await Post.create(postData);
+
+    // Respond with the created post or a success message
+    res.status(201).json(createdPost);
+  } catch (error) {
+    console.error('Error creating post:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 exports.createPost = async (req, res) => {
-  const { authorId, content, media, tags } = req.body;
+  const { authorId, content,  tags } = req.body;
 
   if (!authorId) {
-    return res.status(404).json({ error: 'Post not found' });
+    return res.status(404).json({ error: 'user not found' });
   }
 
   
   // Check if there are files in the request
   if (req.files && req.files.length > 0) {
     try {
-      // Handle file upload
-      upload.array('files', 5)(req, res, async (err) => {
-        if (err instanceof multer.MulterError) {
-          return res.status(400).json({ error: 'File upload error', message: err.message });
-        } else if (err) {
-          return res.status(500).json({ error: 'Internal server error', message: err.message });
-        }
+     
 
         const folder = 'postMedia';
         const uploadResults = [];
@@ -73,7 +113,7 @@ exports.createPost = async (req, res) => {
 
           return res.status(500).json({ error: 'Error processing files', message: uploadError.message });
         }
-      });
+      
     } catch (error) {
       return res.status(500).json({ error: 'Internal server error', message: error.message });
     }
