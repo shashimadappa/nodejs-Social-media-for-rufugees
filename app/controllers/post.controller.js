@@ -58,7 +58,7 @@ exports.createPost2 = async (req, res) => {
 };
 
 exports.createPost = async (req, res) => {
-  const { authorId, content,  tags } = req.body;
+  const { authorId, content,  tags, createdAt } = req.body;
 
   if (!authorId) {
     return res.status(404).json({ error: 'user not found' });
@@ -101,6 +101,7 @@ exports.createPost = async (req, res) => {
             content: content,
             tags: tags,
             media: uploadResults,
+            createdAt: createdAt
           });
           await newPost.save();
 
@@ -125,6 +126,7 @@ exports.createPost = async (req, res) => {
         content: content,
         tags: tags,
         media: [],
+        createdAt: createdAt
       });
       await newPost.save();
 
@@ -172,32 +174,34 @@ exports.likePost = async (req, res) => {
   
       const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
   
-      const finalArray = posts.map(async (post) => {
-        const authorId = post.authorId;
-        const userData = await userTbl.findOne({ _id: authorId });
+      const finalArray = await Promise.all(
+        posts.map(async (post) => {
+          const authorId = post.authorId;
+          const userData = await userTbl.findOne({ _id: authorId });
   
-        // Embed user data within each post object
-        return {
-          _id: post._id,
-          media: post.media,
-          likes: post.likes,
-          content: post.content,
-          tags: post.tags,
-          isActive: post.isActive,
-          createdAt: post.createdAt,
-          user: {
-            _id: userData._id,
-            username: userData.username,
-            // Include other user fields as needed
-            // Add more fields as needed
-          },
-        };
-      });
+          // Embed user data within each post object
+          return {
+            _id: post._id,
+            media: post.media,
+            likes: post.likes,
+            content: post.content,
+            tags: post.tags,
+            isActive: post.isActive,
+            createdAt: post.createdAt,
+            user: {
+              _id: userData._id,
+              username: userData.username,
+              // Include other user fields as needed
+              // Add more fields as needed
+            },
+          };
+        })
+      );
   
-      // Wait for all promises to resolve
-      const combinedDataArray = await Promise.all(finalArray);
+      // Sort the finalArray based on the original order of posts
+      const sortedArray = finalArray.sort((a, b) => posts.findIndex(p => p._id.equals(a._id)) - posts.findIndex(p => p._id.equals(b._id)));
   
-      res.json(combinedDataArray);
+      res.json(sortedArray);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
