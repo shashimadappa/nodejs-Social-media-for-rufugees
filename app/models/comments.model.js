@@ -4,7 +4,8 @@ module.exports = (mongoose) => {
         authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
         postId: { type: mongoose.Schema.Types.ObjectId, ref: 'post', required: true },
         comment: { type: String, required: true },
-        timestamp: { type: Date, },
+        createdAt: { type: Date, },
+        updatedAt: { type: Date, },
         likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }],
         replies: [String],
       }

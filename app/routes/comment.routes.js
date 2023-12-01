@@ -4,7 +4,7 @@ module.exports = app => {
     var router = require("express").Router();
     const token = require("../../app/auth/token");
 
-    // router.get("/getUserById/:id",token.validateToken, user.findOne);
+    router.get("/:postId",token.validateToken, comment.getAllComments);
     // router.patch("/update/:id",token.validateToken, user.updateUser);
 
     // router.patch("/UpdateDp/:id", token.validateToken, user.updateDp);

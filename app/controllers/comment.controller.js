@@ -2,11 +2,11 @@ const db = require("../models");
 const commentTbl = db.comment;
 
 exports.createComment = async (req, res) => {
-  const { authorId, postId, comment, timestamp, likes, replies } = req.body;
+  const { authorId, postId, comment, createdAt, likes, replies } = req.body;
 
   if (!authorId || !postId || !comment) {
     return res.status(400).json({
-      message: " authorId, content or postId not found",
+      message: "authorId, content or postId not found",
     });
   };
 //    const userId = req.id;
@@ -16,7 +16,7 @@ exports.createComment = async (req, res) => {
       authorId,
       postId,
       comment,
-      timestamp,
+      createdAt,
       likes,
       replies,
     });
@@ -26,6 +26,26 @@ exports.createComment = async (req, res) => {
 
     // Respond with the saved comment
     res.json(savedComment);
+  } catch (error) {
+    // Handle errors
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAllComments = async (req, res) => {
+const postId = req.params.postId;
+  if (!postId) {
+    return res.status(400).json({
+      message: "postId not found",
+    });
+  };
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+   const comments = await commentTbl.find({postId}).sort({createdAt: -1}).skip(skip).limit(limit)
+    res.json(comments);
   } catch (error) {
     // Handle errors
     res.status(500).json({ error: error.message });

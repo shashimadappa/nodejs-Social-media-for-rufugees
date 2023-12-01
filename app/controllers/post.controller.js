@@ -68,11 +68,8 @@ exports.createPost = async (req, res) => {
   // Check if there are files in the request
   if (req.files && req.files.length > 0) {
     try {
-     
-
         const folder = 'postMedia';
         const uploadResults = [];
-
         // Upload each file to Cloudinary
         const uploadPromises = req.files.map(file => {
           return new Promise((resolve, reject) => {
