@@ -57,8 +57,8 @@ module.exports = mongoose => {
               resetPasswordOTPExpires: Date,
          
               isActive: Boolean,
-              created_at: { type: Date  },
-              updated_at: { type: Date },
+              createdAt: { type: Date  },
+              updatedAt: { type: Date },
       
       },
       // { timestamps: freez }

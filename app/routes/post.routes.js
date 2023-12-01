@@ -11,7 +11,10 @@ module.exports = app => {
     // router.patch("/update/:id",token.validateToken, user.updateUser);
     // router.patch("/UpdateDp/:id", token.validateToken, user.updateDp);
     // router.post("/forgotPassword", user.forgotPassword);
-    router.post("/:userId", token.validateToken, upload.array('images'), Post.createPost );
+    router.post("/", token.validateToken, upload.array('images'), Post.createPost );
+
+
+
     router.post("/2/:userId", token.validateToken, upload.array('images'), Post.createPost2 );
   
     router.delete("/:postId",token.validateToken, Post.deletePost);

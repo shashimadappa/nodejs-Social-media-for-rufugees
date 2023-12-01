@@ -63,7 +63,7 @@ exports.createPost = async (req, res) => {
   if (!authorId) {
     return res.status(404).json({ error: 'user not found' });
   }
-  console.log(req.files);
+  console.log('teq.files>>>>>>>>>>>>..',req.files);
   
 
   
