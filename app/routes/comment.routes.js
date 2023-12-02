@@ -10,7 +10,8 @@ module.exports = app => {
     // router.patch("/UpdateDp/:id", token.validateToken, user.updateDp);
 
     // router.post("/forgotPassword", user.forgotPassword);
-    router.post("/", token.validateToken, comment.createComment );
+    router.post("/", token.validateToken, comment.createComment ); 
+    router.delete("/:commentId", token.validateToken, comment.deletePost );
     // router.post("/like-comment/:CommentId", token.validateToken, comment.likeComment);
 
     app.use("/api/comment", router);

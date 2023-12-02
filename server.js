@@ -42,6 +42,7 @@ require("./app/routes/post.routes")(app);
 require("./app/routes/comment.routes")(app);
 // require("./app/routes/message.routes")(app);
 require("./app/routes/funds&grants.routes")(app);
+require("./app/routes/helpmycase.routes")(app);
 
 
 

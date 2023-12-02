@@ -63,10 +63,6 @@ exports.createPost = async (req, res) => {
   if (!authorId) {
     return res.status(404).json({ error: 'user not found' });
   }
-  console.log('teq.files>>>>>>>>>>>>..',req.files);
-  
-
-  
   // Check if there are files in the request
   if (req.files && req.files.length > 0) {
     try {
@@ -213,32 +209,22 @@ exports.likePost = async (req, res) => {
 
 // Delete a post by ID
 exports.deletePost = async (req, res) => {
-  const postId = req.params.postId;
 
   try {
-    // Find the post by ID
-    const postData = await post.findById(postId);
+    const postId = req.params.postId;
+    const userId = req.userId;
 
-    // Check if the post exists
-    if (!postData) {
-      return res.status(404).json({ error: 'Post not found' });
+    // Find the post by ID and user ID
+    const Post = await post.findOne({ _id: postId, userId });
+
+    if (!Post) {
+      return res.status(404).json({ message: 'Post not found' });
     }
-    await postData.remove();
+    // Remove the post
+    const deletedPost = await post.findByIdAndRemove(postId);
 
-    postData.media.forEach(async (media) => {
-      try {
-        // Use the provided public ID (key) to delete the media file from Cloudinary
-        await cloudinary.uploader.destroy(media.key);
-
-        // Alternatively, you can use the URL to delete the media file:
-        // await cloudinary.uploader.destroy(media.url);
-      } catch (deleteError) {
-        console.error(deleteError);
-        // Handle any errors that occur during media deletion
-      }
-    });
-
-    res.json({ message: 'Post deleted successfully' });
+    res.json({ message: 'Post deleted successfully', deletedPost });
+ 
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Internal Server Error' });

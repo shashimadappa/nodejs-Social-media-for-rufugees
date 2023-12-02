@@ -33,6 +33,33 @@ exports.createComment = async (req, res) => {
   }
 };
 
+exports.deletePost = async (req, res) => {
+
+  try {
+    const commentId = req.params.commentId;
+    const authorId = req.id;
+
+  
+    if (!authorId) {
+      return res.status(404).json({ message: 'unauthorized' });
+    }
+    // Find the post by ID and user ID
+    const comment = await commentTbl.findOne({ _id: commentId, authorId: authorId });
+    console.log(comment)
+    if (!comment) {
+      return res.status(404).json({ message: 'comment not found' });
+    }
+    // Remove the post
+    const deletedPost = await commentTbl.findByIdAndRemove(commentId);
+
+    res.json({ message: 'Post deleted successfully', deletedPost });
+ 
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 exports.getAllComments = async (req, res) => {
 const postId = req.params.postId;
   if (!postId) {
