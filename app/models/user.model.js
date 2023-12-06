@@ -23,11 +23,12 @@ module.exports = mongoose => {
               },
               role: String,
               gender: String,
-              location: {
-                city: String,
-                state: String,
-                country: String,
-              },
+              // location: {
+              //   city: String,
+              //   state: String,
+              //   country: String,
+              // },
+              location: String,
               tags: [String],
               mission: String,
               occupation: String,

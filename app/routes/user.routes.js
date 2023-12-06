@@ -8,12 +8,15 @@ module.exports = app => {
     router.post("/login", user.login);
 
     router.get("/getUserById/:id",token.validateToken, user.findOne);
+
     router.patch("/update/:id",token.validateToken, user.updateUser);
 
     router.patch("/UpdateDp/:id", token.validateToken, user.updateDp);
 
     router.post("/forgotPassword", user.forgotPassword);
     router.post("/resetForgotPassword", user.resetForgotPassword);
+
+    router.get("/findByLocation",token.validateToken, user.findByLocation);
 
     app.use("/api/user", router);
   

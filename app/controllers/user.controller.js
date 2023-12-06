@@ -93,6 +93,7 @@ exports.createUser = async (req, res) => {
     email,
     password,
     referenceEmail,
+    // createdAt,
   } = req.body;
 
   const existingUser = await User.findOne({ email });
@@ -133,7 +134,7 @@ exports.createUser = async (req, res) => {
         offeringToNetwork: req.body.offeringToNetwork || "",
         lookingForNetwork: req.body.lookingForNetwork || "",
         preferredLanguage: req.body.preferredLanguage || "",
-        created_at: req.body.created_at || "",
+        created_at: req.body.createdAt || "",
         updated_at: req.body.updated_at || "",
         isActive: req.body.isActive || true,
       };
@@ -165,16 +166,35 @@ exports.findOne = (req, res) => {
       if (!data) {
         return res
           .status(404)
-          .json({ message: "Tutorial not found with id " + id });
+          .json({ message: "user not found with id " + id });
       }
       return res.status(200).json(data);
     })
     .catch((err) => {
-      console.error(`Error retrieving Tutorial with id=${id}: ${err.message}`);
+      console.error(`Error retrieving user with id=${id}: ${err.message}`);
       return res
         .status(500)
-        .json({ message: "Error retrieving Tutorial with id=" + id });
+        .json({ message: "Error retrieving user with id=" + id });
     });
+};
+
+exports.findByLocation = async (req, res) => {
+  try {
+    const location = req.query.location;
+
+    if (!location) {
+      return res.status(400).json({ error: 'Location parameter is required' });
+    }
+    console.log(location);
+    const users = await User.find({ location });
+  
+    res.json(users);
+  } catch (err) {
+    // Handle errors
+    return res
+      .status(500)
+      .json({ message: "Error occurred while updating the User." });
+  }
 };
 
 exports.updateUser = async (req, res) => {
