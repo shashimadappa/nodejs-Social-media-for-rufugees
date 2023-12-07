@@ -8,6 +8,7 @@ const sendEmail = require('../utils/sendEmail')
 const Token = require("../auth/token");
 const cloudinary = require('cloudinary').v2;
 const  cloudinaryConfig = require('../config/cloud')
+const shortid = require('shortid');
 
 cloudinary.config(cloudinaryConfig);
 
@@ -87,8 +88,8 @@ exports.createUser = async (req, res) => {
     res.status(400).send({ message: "Content can not be empty!" });
     return;
   }
+  const uniqueId = shortid.generate();
 
-  // Get the data from the request body
   const {
     email,
     password,
@@ -112,6 +113,7 @@ exports.createUser = async (req, res) => {
       // Create a new User object with the hashed password and other fields
       const userData = {
         email,
+        uniqueId,
         username: req.body.username || "",
         displayPicture: req.body.displayPicture || "",
         password: hashedPassword,
@@ -175,6 +177,26 @@ exports.findOne = (req, res) => {
       return res
         .status(500)
         .json({ message: "Error retrieving user with id=" + id });
+    });
+};
+
+exports.findOneByUniqueId = (req, res) => {
+  const uniqueId = req.params.uniqueId;
+
+  User.findById(uniqueId)
+    .then((data) => {
+      if (!data) {
+        return res
+          .status(404)
+          .json({ message: "user not found with id " + uniqueId });
+      }
+      return res.status(200).json(data);
+    })
+    .catch((err) => {
+      console.error(`Error retrieving user with id=${id}: ${err.message}`);
+      return res
+        .status(500)
+        .json({ message: "Error retrieving user with id=" + uniqueId });
     });
 };
 

@@ -8,6 +8,7 @@ module.exports = app => {
     router.post("/login", user.login);
 
     router.get("/getUserById/:id",token.validateToken, user.findOne);
+    router.get("/getUserByuniqueId/:uniqueId",token.validateToken, user.findOneByUniqueId);
 
     router.patch("/update/:id",token.validateToken, user.updateUser);
 
