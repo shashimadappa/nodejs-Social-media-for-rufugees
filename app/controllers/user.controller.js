@@ -180,24 +180,23 @@ exports.findOne = (req, res) => {
     });
 };
 
-exports.findOneByUniqueId = (req, res) => {
+exports.findOneByUniqueId = async (req, res) => {
   const uniqueId = req.params.uniqueId;
+  try {
 
-  User.findById(uniqueId)
-    .then((data) => {
-      if (!data) {
-        return res
-          .status(404)
-          .json({ message: "user not found with id " + uniqueId });
-      }
-      return res.status(200).json(data);
-    })
-    .catch((err) => {
-      console.error(`Error retrieving user with id=${id}: ${err.message}`);
-      return res
-        .status(500)
-        .json({ message: "Error retrieving user with id=" + uniqueId });
-    });
+    if (!uniqueId) {
+      return res.status(400).json({ error: 'uniqueId parameter is required' });
+    }
+    console.log('users',uniqueId)
+    const users = await User.find({ uniqueId });
+    console.log('users',users)
+    res.json(users);
+  } catch (err) {
+    // Handle errors
+    return res
+      .status(500)
+      .json({ message: "Error occurred while updating the User." });
+  }
 };
 
 exports.findByLocation = async (req, res) => {
