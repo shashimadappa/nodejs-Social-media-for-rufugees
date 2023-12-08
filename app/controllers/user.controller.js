@@ -121,11 +121,7 @@ exports.createUser = async (req, res) => {
         referenceEmail,
         role: req.body.role || "",
         gender: req.body.gender || "",
-        location: req.body.location || {
-          city: "",
-          state: "",
-          country: ""
-        },
+        location: req.body.location || "",
         tags: req.body.tags || [],
         mission: req.body.mission || "",
         occupation: req.body.occupation || "",
@@ -187,9 +183,7 @@ exports.findOneByUniqueId = async (req, res) => {
     if (!uniqueId) {
       return res.status(400).json({ error: 'uniqueId parameter is required' });
     }
-    console.log('users',uniqueId)
     const users = await User.find({ uniqueId });
-    console.log('users',users)
     res.json(users);
   } catch (err) {
     // Handle errors

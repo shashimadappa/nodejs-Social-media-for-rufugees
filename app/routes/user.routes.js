@@ -7,8 +7,7 @@ module.exports = app => {
     router.post("/create-user", user.createUser);
     router.post("/login", user.login);
 
-    router.get("/getUserById/:id",token.validateToken, user.findOne);
-    router.get("/getUserByuniqueId/:uniqueId",token.validateToken, user.findOneByUniqueId);
+
 
     router.patch("/update/:id",token.validateToken, user.updateUser);
 
@@ -18,6 +17,8 @@ module.exports = app => {
     router.post("/resetForgotPassword", user.resetForgotPassword);
 
     router.get("/findByLocation",token.validateToken, user.findByLocation);
+    router.get("/getUserById/:id",token.validateToken, user.findOne);
+    router.get("/getUserByuniqueId/:uniqueId",token.validateToken, user.findOneByUniqueId);
 
     app.use("/api/user", router);
   
