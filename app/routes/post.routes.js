@@ -20,7 +20,10 @@ module.exports = app => {
     router.delete("/:postId",token.validateToken, Post.deletePost);
 
     router.get("/", token.validateToken, Post.findAll );
+    
     router.get("/:id",token.validateToken, Post.getAllById);
+
+    router.get("/getPostByPostId/:id",token.validateToken, Post.getPostByPostId);
 
     router.post("/likePost/:postId",token.validateToken, Post.likePost);
     router.get("/numberOfLikes/:postId",token.validateToken, Post.getNoOfLikes);

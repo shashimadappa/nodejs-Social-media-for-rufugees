@@ -18,7 +18,8 @@ module.exports = app => {
 
     router.get("/findByLocation",token.validateToken, user.findByLocation);
     router.get("/getUserById/:id",token.validateToken, user.findOne);
-    router.get("/getUserByuniqueId/:uniqueId",token.validateToken, user.findOneByUniqueId);
+
+    router.get("/getUserByuniqueId/:uniqueId", token.validateToken, user.findOneByUniqueId);
 
     app.use("/api/user", router);
   

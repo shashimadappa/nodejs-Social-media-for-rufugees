@@ -184,7 +184,16 @@ exports.findOneByUniqueId = async (req, res) => {
       return res.status(400).json({ error: 'uniqueId parameter is required' });
     }
     const users = await User.find({ uniqueId });
-    res.json(users);
+
+    // Modify the data before sending the response
+    const modifiedUsers = users.map(post => {
+      // Remove the 'email' and '_id' properties
+      const { _id, password, isActive, ...modifiedUsers } = post.toObject();
+      return modifiedUsers;
+    });
+
+      //  console.log(modifiedUsers);
+    res.json(modifiedUsers);
   } catch (err) {
     // Handle errors
     return res
@@ -192,6 +201,8 @@ exports.findOneByUniqueId = async (req, res) => {
       .json({ message: "Error occurred while updating the User." });
   }
 };
+
+
 
 exports.findByLocation = async (req, res) => {
   try {
@@ -270,7 +281,7 @@ exports.login = async (req, res) => {
 
     res
       .status(200)
-      .json({ generateToken, userId: user._id, email: user.email, username : user.username, displayPicture: user.displayPicture });
+      .json({ generateToken, userId: user._id, email: user.email, username : user.username, displayPicture: user.displayPicture, uniqueID : user.uniqueId});
   } catch (error) {
     res.status(500).json({ message: "Error occurred during login" });
   }

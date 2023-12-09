@@ -276,6 +276,29 @@ exports.getAllById = async (req, res) => {
   
 };
 
+
+exports.getPostByPostId = async (req, res) => {
+  const id = req.params.id;
+  if (!id) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    };
+  
+    const posts = await post.find({ _id: id })
+    .then(data => {
+      if (!data)
+        res.status(404).send({ message: "Not found post with id " + id });
+      else res.send(data);
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .send({ message: "Error retrieving Tutorial with id=" + id });
+    });
+
+};
+
 exports.getNoOfLikes = async (req, res) => {
   try {
     const {postId } = req.params;
