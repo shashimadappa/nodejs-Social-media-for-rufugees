@@ -18,7 +18,7 @@ module.exports = (mongoose) => {
           type: mongoose.Schema.Types.ObjectId,
           // ref: "like",
           ref: "user",
-          },
+        },
       ],
       comments: [
         {
@@ -34,11 +34,9 @@ module.exports = (mongoose) => {
       },
       createdAt: {
         type: Date,
-    
       },
       updatedAt: {
         type: Date,
-   
       },
     }
     // { timestamps: true }

@@ -18,9 +18,9 @@ const validateToken = (req, res, next) => {
     if (err) {
       return res.status(401).json({ message: "Invalid token" });
     }
-    // Attach the decoded user ID to the request for later use
+
     req.id = decoded.id;
-    req.email = decoded.email
+    req.email = decoded.email;
     next();
   });
 };
@@ -30,6 +30,7 @@ const generateToken = (user) => {
     id: user.id,
     username: user.username,
     email: user.email,
+    // uniqueID: user.uniqueId
   };
 
   const oneWeekInSeconds = 7 * 24 * 60 * 60; // 7 days * 24 hours * 60 minutes * 60 seconds

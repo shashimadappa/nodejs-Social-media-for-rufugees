@@ -4,11 +4,11 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
-const sendEmail = require('../utils/sendEmail')
+const sendEmail = require("../utils/sendEmail");
 const Token = require("../auth/token");
-const cloudinary = require('cloudinary').v2;
-const  cloudinaryConfig = require('../config/cloud')
-const shortid = require('shortid');
+const cloudinary = require("cloudinary").v2;
+const cloudinaryConfig = require("../config/cloud");
+const shortid = require("shortid");
 
 cloudinary.config(cloudinaryConfig);
 
@@ -16,14 +16,10 @@ cloudinary.config(cloudinaryConfig);
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-
 exports.updateDp = async (req, res) => {
   try {
     const id = req.params.id;
-
-
     const user = await User.findById(id);
-
     // Check if the user exists
     if (!user) {
       return res.status(404).json({ message: `User with ID ${id} not found.` });
@@ -36,50 +32,69 @@ exports.updateDp = async (req, res) => {
         await cloudinary.uploader.destroy(user.displayPicture.public_id);
       } catch (deleteError) {
         console.error(deleteError);
-        return res.status(500).json({ error: 'Error deleting existing display picture', message: deleteError.message });
+        return res.status(500).json({
+          error: "Error deleting existing display picture",
+          message: deleteError.message,
+        });
       }
     }
-
-
-
     // Handle file upload
-    upload.single('file')(req, res, async (err) => {
+    upload.single("file")(req, res, async (err) => {
       if (err instanceof multer.MulterError) {
-        return res.status(400).json({ error: 'File upload error', message: err.message });
+        return res
+          .status(400)
+          .json({ error: "File upload error", message: err.message });
       } else if (err) {
-        return res.status(500).json({ error: 'Internal server error', message: err.message });
+        return res
+          .status(500)
+          .json({ error: "Internal server error", message: err.message });
       }
-      const folder = 'displayPicture'; 
+      const folder = "displayPicture";
       // Upload the file to Cloudinary
-      cloudinary.uploader.upload_stream({ resource_type: 'auto', folder: folder }, async (error, result) => {
-        if (error) {
-          return res.status(500).json({ error: 'Upload failed', message: error.message });
-        }
+      cloudinary.uploader
+        .upload_stream(
+          { resource_type: "auto", folder: folder },
+          async (error, result) => {
+            if (error) {
+              return res
+                .status(500)
+                .json({ error: "Upload failed", message: error.message });
+            }
 
-        // Update the user's display picture in the database
-        const filePath = result.secure_url;
-        const { public_id, secure_url } = result;
-        const updatedUser = await User.findByIdAndUpdate(
-          id,
-          {
-          displayPicture: {
-            public_id,
-            secure_url,
+            // Update the user's display picture in the database
+            const filePath = result.secure_url;
+            const { public_id, secure_url } = result;
+            const updatedUser = await User.findByIdAndUpdate(
+              id,
+              {
+                displayPicture: {
+                  public_id,
+                  secure_url,
+                },
+              },
+              { new: true }
+            );
+
+            if (!updatedUser) {
+              return res
+                .status(404)
+                .json({ message: `User with ID ${id} not found.` });
+            }
+
+            // File uploaded and user updated successfully
+            res.json({
+              public_id: result.public_id,
+              url: result.secure_url,
+              user: updatedUser,
+            });
           }
-        },
-          { new: true }
-        );
-
-        if (!updatedUser) {
-          return res.status(404).json({ message: `User with ID ${id} not found.` });
-        }
-
-        // File uploaded and user updated successfully
-        res.json({ public_id: result.public_id, url: result.secure_url, user: updatedUser });
-      }).end(req.file.buffer);
+        )
+        .end(req.file.buffer);
     });
   } catch (error) {
-    return res.status(500).json({ error: 'Internal server error', message: error.message });
+    return res
+      .status(500)
+      .json({ error: "Internal server error", message: error.message });
   }
 };
 
@@ -136,7 +151,6 @@ exports.createUser = async (req, res) => {
         updated_at: req.body.updated_at || "",
         isActive: req.body.isActive || true,
       };
-      
 
       const newUser = new User(userData);
 
@@ -179,20 +193,19 @@ exports.findOne = (req, res) => {
 exports.findOneByUniqueId = async (req, res) => {
   const uniqueId = req.params.uniqueId;
   try {
-
     if (!uniqueId) {
-      return res.status(400).json({ error: 'uniqueId parameter is required' });
+      return res.status(400).json({ error: "uniqueId parameter is required" });
     }
     const users = await User.find({ uniqueId });
 
     // Modify the data before sending the response
-    const modifiedUsers = users.map(post => {
+    const modifiedUsers = users.map((post) => {
       // Remove the 'email' and '_id' properties
       const { _id, password, isActive, ...modifiedUsers } = post.toObject();
       return modifiedUsers;
     });
 
-      //  console.log(modifiedUsers);
+    //  console.log(modifiedUsers);
     res.json(modifiedUsers);
   } catch (err) {
     // Handle errors
@@ -202,18 +215,16 @@ exports.findOneByUniqueId = async (req, res) => {
   }
 };
 
-
-
 exports.findByLocation = async (req, res) => {
   try {
     const location = req.query.location;
 
     if (!location) {
-      return res.status(400).json({ error: 'Location parameter is required' });
+      return res.status(400).json({ error: "Location parameter is required" });
     }
     console.log(location);
     const users = await User.find({ location });
-  
+
     res.json(users);
   } catch (err) {
     // Handle errors
@@ -224,7 +235,6 @@ exports.findByLocation = async (req, res) => {
 };
 
 exports.updateUser = async (req, res) => {
-
   try {
     // Validate request
     if (!req.body) {
@@ -279,15 +289,18 @@ exports.login = async (req, res) => {
 
     const generateToken = Token.generateToken(user);
 
-    res
-      .status(200)
-      .json({ generateToken, userId: user._id, email: user.email, username : user.username, displayPicture: user.displayPicture, uniqueID : user.uniqueId});
+    res.status(200).json({
+      generateToken,
+      userId: user._id,
+      email: user.email,
+      username: user.username,
+      displayPicture: user.displayPicture,
+      uniqueID: user.uniqueId,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error occurred during login" });
   }
 };
-
-
 
 exports.forgotPassword = async (req, res) => {
   try {
@@ -307,21 +320,17 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     sendEmail({
-      to:  [
-        user.email
-      ], // Replace with the recipient's email address
+      to: [user.email], // Replace with the recipient's email address
       subject: "OTP for password change AWON",
       html: random6DigitNumber,
     });
 
     res.status(200).json({ message: "OTP sent to the user's email" });
-    
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error occurred during OTP generation" });
   }
 };
-
 
 exports.resetForgotPassword = async (req, res) => {
   try {
@@ -335,8 +344,10 @@ exports.resetForgotPassword = async (req, res) => {
     }
 
     // Verify the OTP
-    if (user.resetPasswordOTP !== otp || user.resetPasswordOTPExpires < Date.now()) {
-
+    if (
+      user.resetPasswordOTP !== otp ||
+      user.resetPasswordOTPExpires < Date.now()
+    ) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
@@ -354,4 +365,3 @@ exports.resetForgotPassword = async (req, res) => {
     res.status(500).json({ message: "Error occurred during password reset" });
   }
 };
-

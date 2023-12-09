@@ -1,20 +1,13 @@
-module.exports = app => {
-    const comment = require("../controllers/comment.controller");
-  
-    var router = require("express").Router();
-    const token = require("../../app/auth/token");
+module.exports = (app) => {
+  const comment = require("../controllers/comment.controller");
 
-    router.get("/:postId",token.validateToken, comment.getAllComments);
-    // router.patch("/update/:id",token.validateToken, user.updateUser);
+  var router = require("express").Router();
+  const token = require("../../app/auth/token");
 
-    // router.patch("/UpdateDp/:id", token.validateToken, user.updateDp);
+  router.get("/:postId", token.validateToken, comment.getAllComments);
 
-    // router.post("/forgotPassword", user.forgotPassword);
-    router.post("/", token.validateToken, comment.createComment ); 
-    router.delete("/:commentId", token.validateToken, comment.deletePost );
-    // router.post("/like-comment/:CommentId", token.validateToken, comment.likeComment);
+  router.post("/", token.validateToken, comment.createComment);
+  router.delete("/:commentId", token.validateToken, comment.deletePost);
 
-    app.use("/api/comment", router);
-  
-  };
-  
+  app.use("/api/comment", router);
+};

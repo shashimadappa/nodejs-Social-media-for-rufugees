@@ -1,10 +1,10 @@
 const db = require("../models");
 const post = db.post;
-const userTbl = db.users
+const userTbl = db.users;
 
 const multer = require("multer");
-const cloudinary = require('cloudinary').v2;
-const  cloudinaryConfig = require('../config/cloud');
+const cloudinary = require("cloudinary").v2;
+const cloudinaryConfig = require("../config/cloud");
 const userModel = require("../models/user.model");
 cloudinary.config(cloudinaryConfig);
 
@@ -14,13 +14,15 @@ const upload = multer({ storage: storage });
 // Function to upload image to Cloudinary
 const uploadImageToCloudinary = (file) => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(result);
-      }
-    }).end(file.buffer);
+    cloudinary.uploader
+      .upload_stream({ resource_type: "auto" }, (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      })
+      .end(file.buffer);
   });
 };
 
@@ -41,7 +43,7 @@ exports.createPost2 = async (req, res) => {
       );
 
       // Add Cloudinary image URLs to post data
-      postData.imageUrls = cloudinaryResults.map(result => result.secure_url);
+      postData.imageUrls = cloudinaryResults.map((result) => result.secure_url);
     }
 
     console.log(postData);
@@ -52,66 +54,77 @@ exports.createPost2 = async (req, res) => {
     // Respond with the created post or a success message
     res.status(201).json(createdPost);
   } catch (error) {
-    console.error('Error creating post:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error creating post:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 exports.createPost = async (req, res) => {
-  const { authorId, content,  tags, createdAt } = req.body;
+  const { authorId, content, tags, createdAt } = req.body;
 
   if (!authorId) {
-    return res.status(404).json({ error: 'user not found' });
+    return res.status(404).json({ error: "user not found" });
   }
   // Check if there are files in the request
   if (req.files && req.files.length > 0) {
     try {
-        const folder = 'postMedia';
-        const uploadResults = [];
-        // Upload each file to Cloudinary
-        const uploadPromises = req.files.map(file => {
-          return new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream({ resource_type: 'auto', folder: folder }, (error, result) => {
-              if (error) {
-                reject({ error: 'Upload failed', message: error.message });
-              } else {
-                const media = {
-                  url: result.secure_url,
-                  key: result.public_id
+      const folder = "postMedia";
+      const uploadResults = [];
+      // Upload each file to Cloudinary
+      const uploadPromises = req.files.map((file) => {
+        return new Promise((resolve, reject) => {
+          cloudinary.uploader
+            .upload_stream(
+              { resource_type: "auto", folder: folder },
+              (error, result) => {
+                if (error) {
+                  reject({ error: "Upload failed", message: error.message });
+                } else {
+                  const media = {
+                    url: result.secure_url,
+                    key: result.public_id,
+                  };
+                  uploadResults.push(media);
+
+                  resolve();
                 }
-                uploadResults.push(media);
-                
-                resolve();
               }
-            }).end(file.buffer);
-          });
+            )
+            .end(file.buffer);
+        });
+      });
+
+      try {
+        await Promise.all(uploadPromises);
+
+        // Create a new post object with the required data
+        const newPost = new post({
+          authorId: authorId, // Assuming this ID is constant for this example
+          content: content,
+          tags: tags,
+          media: uploadResults,
+          createdAt: createdAt,
+        });
+        await newPost.save();
+
+        res.json(newPost);
+      } catch (uploadError) {
+        // Rollback: Delete uploaded files on Cloudinary if there's an error saving to the database
+        uploadResults.forEach(async (data) => {
+          await cloudinary.uploader.destroy(data.url); // Assumes the Cloudinary URLs are the public IDs
         });
 
-        try {
-          await Promise.all(uploadPromises);
-
-          // Create a new post object with the required data
-          const newPost = new post({
-            authorId: authorId, // Assuming this ID is constant for this example
-            content: content,
-            tags: tags,
-            media: uploadResults,
-            createdAt: createdAt
+        return res
+          .status(500)
+          .json({
+            error: "Error processing files",
+            message: uploadError.message,
           });
-          await newPost.save();
-
-          res.json(newPost);
-        } catch (uploadError) {
-          // Rollback: Delete uploaded files on Cloudinary if there's an error saving to the database
-          uploadResults.forEach(async (data) => {
-            await cloudinary.uploader.destroy(data.url); // Assumes the Cloudinary URLs are the public IDs
-          });
-
-          return res.status(500).json({ error: 'Error processing files', message: uploadError.message });
-        }
-      
+      }
     } catch (error) {
-      return res.status(500).json({ error: 'Internal server error', message: error.message });
+      return res
+        .status(500)
+        .json({ error: "Internal server error", message: error.message });
     }
   } else {
     // If no files, create a new post without media
@@ -121,13 +134,15 @@ exports.createPost = async (req, res) => {
         content: content,
         tags: tags,
         media: [],
-        createdAt: createdAt
+        createdAt: createdAt,
       });
       await newPost.save();
 
       res.json(newPost);
     } catch (error) {
-      return res.status(500).json({ error: 'Internal server error', message: error.message });
+      return res
+        .status(500)
+        .json({ error: "Internal server error", message: error.message });
     }
   }
 };
@@ -140,7 +155,7 @@ exports.likePost = async (req, res) => {
     const post2 = await post.findById(postId);
 
     if (!post2) {
-      return res.status(404).json({ error: 'Post not found' });
+      return res.status(404).json({ error: "Post not found" });
     }
     const existingLike = post2.likes.find((like) => like.equals(userId));
     // If the user already liked the post, remove the like (dislike)
@@ -149,7 +164,6 @@ exports.likePost = async (req, res) => {
     } else {
       // If the user has not liked the post, add the like
       post2.likes.push(userId);
-
     }
 
     const updatedPost = await post2.save();
@@ -158,58 +172,63 @@ exports.likePost = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-  };
-  
-  exports.findAll = async (req, res) => {
-    try {
-      // Updated pagination logic: Get posts based on URI parameters
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = (page - 1) * limit;
-  
-      const posts = await post.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
-  
-      const finalArray = await Promise.all(
-        posts.map(async (post) => {
-          const authorId = post.authorId;
-          const userData = await userTbl.findOne({ _id: authorId });
-  
-          // Embed user data within each post object
-          return {
-            _id: post._id,
-            media: post.media,
-            likes: post.likes,
-            content: post.content,
-            tags: post.tags,
-            isActive: post.isActive,
-            createdAt: post.createdAt,
-            user: {
-              _id: userData._id,
-              username: userData.username,
-              picture: userData.displayPicture.secure_url,
-              occupation: userData.occupation,
-              // Include other user fields as needed
-              // Add more fields as needed
-            },
-          };
-        })
-      );
-  
-      // Sort the finalArray based on the original order of posts
-      const sortedArray = finalArray.sort((a, b) => posts.findIndex(p => p._id.equals(a._id)) - posts.findIndex(p => p._id.equals(b._id)));
-  
-      res.json(sortedArray);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  };
-  
+};
 
+exports.findAll = async (req, res) => {
+  try {
+    // Updated pagination logic: Get posts based on URI parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const posts = await post
+      .find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const finalArray = await Promise.all(
+      posts.map(async (post) => {
+        const authorId = post.authorId;
+        const userData = await userTbl.findOne({ _id: authorId });
+
+        // Embed user data within each post object
+        return {
+          _id: post._id,
+          media: post.media,
+          likes: post.likes,
+          content: post.content,
+          tags: post.tags,
+          isActive: post.isActive,
+          createdAt: post.createdAt,
+          user: {
+            _id: userData._id,
+            username: userData.username,
+            picture: userData.displayPicture.secure_url,
+            occupation: userData.occupation,
+            // Include other user fields as needed
+            // Add more fields as needed
+          },
+        };
+      })
+    );
+
+    // Sort the finalArray based on the original order of posts
+    const sortedArray = finalArray.sort(
+      (a, b) =>
+        posts.findIndex((p) => p._id.equals(a._id)) -
+        posts.findIndex((p) => p._id.equals(b._id))
+    );
+
+    res.json(sortedArray);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 // Delete a post by ID
 exports.deletePost = async (req, res) => {
-
   try {
     const postId = req.params.postId;
     const userId = req.userId;
@@ -218,95 +237,92 @@ exports.deletePost = async (req, res) => {
     const Post = await post.findOne({ _id: postId, userId });
 
     if (!Post) {
-      return res.status(404).json({ message: 'Post not found' });
+      return res.status(404).json({ message: "Post not found" });
     }
     // Remove the post
     const deletedPost = await post.findByIdAndRemove(postId);
 
-    res.json({ message: 'Post deleted successfully', deletedPost });
- 
+    res.json({ message: "Post deleted successfully", deletedPost });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 exports.findOne = (req, res) => {
-    const id = req.params.id;
-
-    if (!id) {
-        return res.status(400).json({
-          message: "Invalid post data",
-        });
-      }
-  
-    Tutorial.findById(id)
-      .then(data => {
-        if (!data)
-          res.status(404).send({ message: "Not found Tutorial with id " + id });
-        else res.send(data);
-      })
-      .catch(err => {
-        res
-          .status(500)
-          .send({ message: "Error retrieving Tutorial with id=" + id });
-      });
-  };
-
-
-exports.getAllById = async (req, res) => {
-    const id = req.params.id;
-    if (!id) {
-        return res.status(400).json({
-          message: "User not found",
-        });
-      };
-    
-      const posts = await post.find({ authorId: id })
-      .then(data => {
-        if (!data)
-          res.status(404).send({ message: "Not found post with id " + id });
-        else res.send(data);
-      })
-      .catch(err => {
-        res
-          .status(500)
-          .send({ message: "Error retrieving Tutorial with id=" + id });
-      });
-  
-};
-
-
-exports.getPostByPostId = async (req, res) => {
   const id = req.params.id;
+
   if (!id) {
-      return res.status(400).json({
-        message: "User not found",
-      });
-    };
-  
-    const posts = await post.find({ _id: id })
-    .then(data => {
+    return res.status(400).json({
+      message: "Invalid post data",
+    });
+  }
+
+  Tutorial.findById(id)
+    .then((data) => {
       if (!data)
-        res.status(404).send({ message: "Not found post with id " + id });
+        res.status(404).send({ message: "Not found Tutorial with id " + id });
       else res.send(data);
     })
-    .catch(err => {
+    .catch((err) => {
       res
         .status(500)
         .send({ message: "Error retrieving Tutorial with id=" + id });
     });
+};
 
+exports.getAllById = async (req, res) => {
+  const id = req.params.id;
+  if (!id) {
+    return res.status(400).json({
+      message: "User not found",
+    });
+  }
+
+  const posts = await post
+    .find({ authorId: id })
+    .then((data) => {
+      if (!data)
+        res.status(404).send({ message: "Not found post with id " + id });
+      else res.send(data);
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .send({ message: "Error retrieving Tutorial with id=" + id });
+    });
+};
+
+exports.getPostByPostId = async (req, res) => {
+  const id = req.params.id;
+  if (!id) {
+    return res.status(400).json({
+      message: "User not found",
+    });
+  }
+
+  const posts = await post
+    .find({ _id: id })
+    .then((data) => {
+      if (!data)
+        res.status(404).send({ message: "Not found post with id " + id });
+      else res.send(data);
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .send({ message: "Error retrieving Tutorial with id=" + id });
+    });
 };
 
 exports.getNoOfLikes = async (req, res) => {
   try {
-    const {postId } = req.params;
-  
+    const { postId } = req.params;
+
     const media = await post.findById(postId);
 
     if (!media) {
-      return res.status(404).json({ error: 'Media not found' });
+      return res.status(404).json({ error: "Media not found" });
     }
 
     const likeCount = media.likes.length;
@@ -314,6 +330,6 @@ exports.getNoOfLikes = async (req, res) => {
     res.json({ likeCount });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    res.status(500).send("Server Error");
   }
 };
