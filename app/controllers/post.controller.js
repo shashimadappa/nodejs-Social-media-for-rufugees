@@ -297,22 +297,57 @@ exports.getPostByPostId = async (req, res) => {
   const id = req.params.id;
   if (!id) {
     return res.status(400).json({
-      message: "User not found",
+      message: "post not found",
     });
   }
 
-  const posts = await post
-    .find({ _id: id })
-    .then((data) => {
-      if (!data)
-        res.status(404).send({ message: "Not found post with id " + id });
-      else res.send(data);
-    })
-    .catch((err) => {
-      res
-        .status(500)
-        .send({ message: "Error retrieving Tutorial with id=" + id });
-    });
+  try {
+    // Updated pagination logic: Get posts based on URI parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const posts = await post.find({_id : id})
+    console.log(posts);
+
+    const finalArray = await Promise.all(
+      posts.map(async (post) => {
+        const authorId = post.authorId;
+        const userData = await userTbl.findOne({ _id: authorId });
+
+        // Embed user data within each post object
+        return {
+          _id: post._id,
+          media: post.media,
+          likes: post.likes,
+          content: post.content,
+          tags: post.tags,
+          isActive: post.isActive,
+          createdAt: post.createdAt,
+          user: {
+            _id: userData._id,
+            username: userData.username,
+            picture: userData.displayPicture.secure_url,
+            occupation: userData.occupation,
+            // Include other user fields as needed
+            // Add more fields as needed
+          },
+        };
+      })
+    );
+
+    // Sort the finalArray based on the original order of posts
+    const sortedArray = finalArray.sort(
+      (a, b) =>
+        posts.findIndex((p) => p._id.equals(a._id)) -
+        posts.findIndex((p) => p._id.equals(b._id))
+    );
+
+    res.json(sortedArray);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 exports.getNoOfLikes = async (req, res) => {
