@@ -365,3 +365,32 @@ exports.resetForgotPassword = async (req, res) => {
     res.status(500).json({ message: "Error occurred during password reset" });
   }
 };
+
+
+exports.findUserByName = async (req, res) => {
+  try {
+    const searchName = req.params.name;
+    
+    // Using a regular expression to perform a case-insensitive search
+    const users = await User.find({ username: { $regex: new RegExp(searchName, 'i') } });
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error occurred during password reset" });
+  }
+};
+
+exports.findUserByTags = async (req, res) => {
+  try {
+    const tags = req.params.tags;
+    
+    // Using a regular expression to perform a case-insensitive search
+    const users = await User.find({ tags: { $regex: new RegExp(tags, 'i') } });
+
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error occurred during password reset" });
+  }
+};
