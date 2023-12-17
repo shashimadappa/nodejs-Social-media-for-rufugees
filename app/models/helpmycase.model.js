@@ -30,6 +30,10 @@ module.exports = (mongoose) => {
         type: String,
         // required: true,
       },
+      url: {
+        type: String,
+        // required: true,
+      },
       applicationDeadline: {
         type: Date,
       },

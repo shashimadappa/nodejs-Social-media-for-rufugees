@@ -9,6 +9,7 @@ exports.createFunds = async (req, res) => {
     fundsNeeded,
     discription,
     tags,
+    url,
     location,
     applicationDeadline,
     createdAt,
@@ -29,6 +30,7 @@ exports.createFunds = async (req, res) => {
       discription,
       tags,
       location,
+      url,
       fundsNeeded,
       applicationDeadline,
       createdAt,
@@ -71,8 +73,6 @@ exports.findAll = async (req, res) => {
             username: userData.username,
             picture: userData.displayPicture.secure_url,
             occupation: userData.occupation,
-            // Include other user fields as needed
-            // Add more fields as needed
           },
         };
       })
