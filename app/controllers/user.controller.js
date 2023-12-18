@@ -180,8 +180,12 @@ exports.findOne = (req, res) => {
           .status(404)
           .json({ message: "user not found with id " + id });
       }
-      return res.status(200).json(data);
+      const modifiedUser = { ...data._doc };
+      delete modifiedUser.password;
+
+      return res.status(200).json(modifiedUser);
     })
+
     .catch((err) => {
       console.error(`Error retrieving user with id=${id}: ${err.message}`);
       return res
@@ -200,7 +204,6 @@ exports.findOneByUniqueId = async (req, res) => {
 
     // Modify the data before sending the response
     const modifiedUsers = users.map((post) => {
-      // Remove the 'email' and '_id' properties
       const { _id, password, isActive, ...modifiedUsers } = post.toObject();
       return modifiedUsers;
     });
@@ -367,17 +370,40 @@ exports.resetForgotPassword = async (req, res) => {
 };
 
 
-exports.findUserByName = async (req, res) => {
+exports.findUserByNameOrCountry = async (req, res) => {
   try {
-    const searchName = req.params.name;
-    
-    // Using a regular expression to perform a case-insensitive search
-    const users = await User.find({ username: { $regex: new RegExp(searchName, 'i') } });
+    const { country, name } = req.query;
 
-    res.json(users);
+    if (!country && !name) {
+      return res.status(400).json({ message: 'Provide at least id or name parameter' });
+    }
+
+    let query = {};
+
+    if (country) {
+      query.location = {$regex: new RegExp(country, 'i')};
+    }
+
+    if (name) {
+      query.username = { $regex: new RegExp(name, 'i') };
+    }
+
+    const users = await User.find(query);
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ message: 'No users found' });
+    }
+
+    // Exclude sensitive data like password before sending the response
+    const sanitizedUsers = users.map(user => {
+      const { password, ...userData } = user._doc;
+      return userData;
+    });
+
+    return res.status(200).json(sanitizedUsers);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error occurred during password reset" });
+    console.error(`Error retrieving user: ${error.message}`);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 

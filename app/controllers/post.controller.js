@@ -177,6 +177,7 @@ exports.likePost = async (req, res) => {
 exports.findAll = async (req, res) => {
   try {
     // Updated pagination logic: Get posts based on URI parameters
+    // const 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -206,6 +207,7 @@ exports.findAll = async (req, res) => {
             username: userData.username,
             picture: userData.displayPicture.secure_url,
             occupation: userData.occupation,
+            uniqueId: userData.uniqueId
             // Include other user fields as needed
             // Add more fields as needed
           },

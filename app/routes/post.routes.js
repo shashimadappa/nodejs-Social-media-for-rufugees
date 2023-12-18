@@ -14,13 +14,13 @@ module.exports = (app) => {
     upload.array("images"),
     Post.createPost
   );
-
   router.post(
     "/2/:userId",
     token.validateToken,
     upload.array("images"),
     Post.createPost2
   );
+  router.post("/likePost/:postId", token.validateToken, Post.likePost);
 
   router.delete("/:postId", token.validateToken, Post.deletePost);
 
@@ -29,8 +29,6 @@ module.exports = (app) => {
   router.get("/:id", token.validateToken, Post.getAllById);
 
   router.get("/getPostByPostId/:id", token.validateToken, Post.getPostByPostId);
-
-  router.post("/likePost/:postId", token.validateToken, Post.likePost);
   router.get("/numberOfLikes/:postId", token.validateToken, Post.getNoOfLikes);
 
   app.use("/api/post", router);
