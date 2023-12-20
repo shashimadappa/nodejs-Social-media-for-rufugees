@@ -331,6 +331,7 @@ exports.getPostByPostId = async (req, res) => {
             username: userData.username,
             picture: userData.displayPicture.secure_url,
             occupation: userData.occupation,
+            uniqueId: userData.uniqueId
             // Include other user fields as needed
             // Add more fields as needed
           },
