@@ -420,3 +420,32 @@ exports.findUserByTags = async (req, res) => {
     res.status(500).json({ message: "Error occurred during password reset" });
   }
 };
+
+
+exports.getAllUsers = async (req, res) => {
+  try {
+
+    // const users = await User.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const users = await User
+      .find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const sanitizedUsers = users.map(user => {
+      const { password, experience,education, role, gender, offeringToNetwork, lookingForNetwork, preferredLanguage, organization, occupation,skills, isActive, resetPasswordOTP, resetPasswordOTPExpires, mission, ...userData } = user._doc;
+      return userData;
+    });
+
+    res.json(sanitizedUsers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error occurred during password reset" });
+  }
+};
+
+
