@@ -291,7 +291,7 @@ exports.login = async (req, res) => {
     }
 
     const generateToken = Token.generateToken(user);
-
+    console.log(generateToken)
     res.status(200).json({
       generateToken,
       userId: user._id,

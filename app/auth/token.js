@@ -32,10 +32,10 @@ const generateToken = (user) => {
     email: user.email,
     // uniqueID: user.uniqueId
   };
-
+  console.log(payload)
   const twoHoursInSeconds = 2 * 60 * 60; //two hours
   const options = {
-    expiresIn: oneWeekInSeconds, // Token expiration time set to one week
+    expiresIn: twoHoursInSeconds, // Token expiration time set to one week
   };
   // Generate the token
   const token = jwt.sign(payload, secretKey, options);
