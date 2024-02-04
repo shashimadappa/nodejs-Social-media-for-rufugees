@@ -7,7 +7,10 @@ module.exports = (app) => {
   router.get("/:postId", token.validateToken, comment.getAllComments);
 
   router.post("/", token.validateToken, comment.createComment);
+
   router.delete("/:commentId", token.validateToken, comment.deletePost);
+
+  router.get("/getNoOfComments/:postId", token.validateToken, comment.getNoOfComments);
 
   app.use("/api/comment", router);
 };

@@ -143,47 +143,19 @@ exports.replyComment = async (req, res) => {
   }
 };
 
-// exports.createComment = async (req, res) => {
-//   const { authorId, postId, comment, timestamp, likes, replies } = req.body;
+exports.getNoOfComments = async (req, res) => {
+  try {
+    const { postId } = req.params;
 
-//   if (!authorId || !postId || !comment) {
-//     return res.status(400).json({
-//       message: " authorId, content or postId not found",
-//     });
-//   };
-// //    const userId = req.id;
-//   try {
-//     // Create a new comment instance
-//     const newComment = new commentTbl({
-//       authorId,
-//       postId,
-//       comment,
-//       timestamp,
-//       likes,
-//       replies,
-//     });
+    const commentCount = await commentTbl.countDocuments({ postId: postId });
 
-//     // Save the comment to the database
-//     const savedComment = await newComment.save();
+    if (!commentCount) {
+      return res.status(404).json({ error: "Media not found" });
+    }
 
-//     // Respond with the saved comment
-//     res.json(savedComment);
-//   } catch (error) {
-//     // Handle errors
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
-//   exports.likeComment = async (req, res) => {
-//       const authorId = req.id;
-//       const {  postId, commentId, timestamp, likes, replies } = req.body;
-
-//       const comment2 = await comment.findById(commentId);
-//     console.log(comment2);
-//       if (!authorId || !postId ) {
-//         return res.status(400).json({
-//           message: " authorId, content or postId not found",
-//         });
-//       };
-
-//     };
+    res.json({ commentCount });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send(err.message);
+  }
+};
