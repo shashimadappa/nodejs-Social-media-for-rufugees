@@ -241,6 +241,20 @@ exports.deletePost = async (req, res) => {
     if (!Post) {
       return res.status(404).json({ message: "Post not found" });
     }
+    // console.log ("post key : ",(Post.media[0].key))
+    if (Post.media && Post.media[0].key) {
+      // Delete the existing display picture from Cloudinary
+      try {
+        await cloudinary.uploader.destroy(Post.media[0].key);
+      } catch (deleteError) {
+        console.error(deleteError);
+        return res.status(500).json({
+          error: "Error deleting existing post picture",
+          message: deleteError.message,
+        });
+      }
+    }
+
     // Remove the post
     const deletedPost = await post.findByIdAndRemove(postId);
 
