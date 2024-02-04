@@ -91,3 +91,21 @@ exports.findAll = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.deleteCase = async (req, res) => {
+  try {
+    const caseId = req.params.caseId;
+    const userId = req.userId;
+    const caase = await helpmycaseTbl.findOne({ _id: caseId, userId });
+
+    if (!caase) {
+      return res.status(404).json({ message: "case not found" });
+    }
+    const deletedCase = await helpmycaseTbl.findByIdAndRemove({_id : caseId});
+
+    res.json({ message: "case deleted successfully", deletedPost: deletedCase });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
