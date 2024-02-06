@@ -118,9 +118,32 @@ exports.deleteFunds = async (req, res) => {
     if (!funds) {
       return res.status(404).json({ message: "Post not found" });
     }
-    const deletedfunds = await post.findByIdAndRemove(fundsId);
+    const deletedfunds = await fundsTbl.findByIdAndRemove(fundsId);
 
     res.json({ message: "Funds deleted successfully", deletedPost: deletedfunds });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.updateFunds = async (req, res) => {
+  try {
+    const fundsId = req.params.fundsId;
+    const userId = req.userId;
+    const updateData = req.body; 
+
+    const funds = await fundsTbl.findOne({ _id: fundsId });
+
+    if (!funds) {
+      return res.status(404).json({ message: "case not found" });
+    }
+
+    const updatedFunds = await fundsTbl.findByIdAndUpdate(fundsId, updateData, {
+      new: true,
+    });
+
+    res.json({ message: "funds deleted successfully", updatedFunds: updatedFunds });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });

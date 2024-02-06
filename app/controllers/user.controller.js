@@ -239,15 +239,13 @@ exports.findByLocation = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    // Validate request
     if (!req.body) {
       return res.status(400).json({ message: "Request body is empty." });
     }
 
-    const userId = req.params.id; // Assuming you have a route parameter for user ID
+    const userId = req.params.id;
     const updateData = req.body;
 
-    // Find the user by their unique ID and update the fields
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
     });

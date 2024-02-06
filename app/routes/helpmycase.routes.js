@@ -7,6 +7,7 @@ module.exports = (app) => {
   router.post("/", token.validateToken, helpmycase.createFunds);
   router.get("/", token.validateToken, helpmycase.findAll);
   router.delete("/:caseId", token.validateToken, helpmycase.deleteCase);
+  router.patch("/:caseId", token.validateToken, helpmycase.updateCase)
 
   app.use("/api/helpmycase", router);
 };

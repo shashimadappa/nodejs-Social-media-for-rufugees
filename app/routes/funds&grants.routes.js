@@ -8,6 +8,7 @@ module.exports = (app) => {
   router.post("/", token.validateToken, funds.createFunds);
   router.get("/", token.validateToken, funds.findAll);
   router.delete("/:fundsId", token.validateToken, funds.deleteFunds);
+  router.patch("/:fundsId", token.validateToken, funds.updateFunds);
 
 
   app.use("/api/funds", router);
