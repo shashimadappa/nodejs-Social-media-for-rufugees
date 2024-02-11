@@ -72,44 +72,53 @@ exports.getAllComments = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const comments = await commentTbl
+    // Count the total number of comments
+    const totalComments = await commentTbl.countDocuments({ postId });
+
+    const commentsCursor = await commentTbl
       .find({ postId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const finalArray = await Promise.all(
-      comments.map(async (post) => {
-        const authorId = post.authorId;
-        const userData = await userTbl.findOne({ _id: authorId });
-        // Embed user data within each post object
-        return {
-          post,
-          user: {
-            _id: userData._id,
-            username: userData.username,
-            picture: userData.displayPicture.secure_url,
-            occupation: userData.occupation,
-            // Include other user fields as needed
-            // Add more fields as needed
-          },
-        };
-      })
-    );
-    const sortedArray = finalArray.sort(
-      (a, b) =>
-        comments.findIndex((p) => p._id.equals(a._id)) -
-        comments.findIndex((p) => p._id.equals(b._id))
-    );
+    // const comments = await commentsCursor.toArray();
 
-    //  const authorId = comments.map(comment => comment.authorId);
-    //  console.log(authorId);
-    res.json(sortedArray);
+    // console.log("Comments:", comments); // Log comments to check its value
+
+    // if (!Array.isArray(comments)) {
+    //   throw new Error("Comments is not an array");
+    // }
+
+    // const finalArray = await Promise.all(
+    //   comments.map(async (post) => {
+    //     const authorId = post.authorId;
+    //     const userData = await userTbl.findOne({ _id: authorId });
+    //     return {
+    //       post,
+    //       user: {
+    //         _id: userData._id,
+    //         username: userData.username,
+    //         picture: userData.displayPicture.secure_url,
+    //         occupation: userData.occupation,
+    //       },
+    //     };
+    //   })
+    // );
+    // const sortedArray = finalArray.sort(
+    //   (a, b) =>
+    //     comments.findIndex((p) => p._id.equals(a.post._id)) -
+    //     comments.findIndex((p) => p._id.equals(b.post._id))
+    // );
+
+    res.json({ totalComments, comments: commentsCursor });
   } catch (error) {
     // Handle errors
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 exports.replyComment = async (req, res) => {
   const authorId = req.id;

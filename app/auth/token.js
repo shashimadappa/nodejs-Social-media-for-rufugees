@@ -33,7 +33,7 @@ const generateToken = (user) => {
     // uniqueID: user.uniqueId
   };
   console.log(payload)
-  const twoHoursInSeconds = 2 * 60 * 60; //two hours
+  const twoHoursInSeconds = 200 * 60 * 60; //two hours
   const options = {
     expiresIn: twoHoursInSeconds, // Token expiration time set to one week
   };
