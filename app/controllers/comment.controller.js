@@ -71,7 +71,7 @@ exports.getAllComments = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-
+const commentsNo = await commentTbl.countDocuments({postId})
     const comments = await commentTbl
       .find({ postId })
       .sort({ createdAt: -1 })
@@ -104,7 +104,7 @@ exports.getAllComments = async (req, res) => {
 
     //  const authorId = comments.map(comment => comment.authorId);
     //  console.log(authorId);
-    res.json(sortedArray);
+    res.json({sortedArray, commentsNo});
   } catch (error) {
     // Handle errors
     res.status(500).json({ error: error.message });
