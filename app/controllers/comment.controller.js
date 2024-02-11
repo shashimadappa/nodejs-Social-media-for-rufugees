@@ -72,53 +72,44 @@ exports.getAllComments = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // Count the total number of comments
-    const totalComments = await commentTbl.countDocuments({ postId });
-
-    const commentsCursor = await commentTbl
+    const comments = await commentTbl
       .find({ postId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    // const comments = await commentsCursor.toArray();
+    const finalArray = await Promise.all(
+      comments.map(async (post) => {
+        const authorId = post.authorId;
+        const userData = await userTbl.findOne({ _id: authorId });
+        // Embed user data within each post object
+        return {
+          post,
+          user: {
+            _id: userData._id,
+            username: userData.username,
+            picture: userData.displayPicture.secure_url,
+            occupation: userData.occupation,
+            // Include other user fields as needed
+            // Add more fields as needed
+          },
+        };
+      })
+    );
+    const sortedArray = finalArray.sort(
+      (a, b) =>
+        comments.findIndex((p) => p._id.equals(a._id)) -
+        comments.findIndex((p) => p._id.equals(b._id))
+    );
 
-    // console.log("Comments:", comments); // Log comments to check its value
-
-    // if (!Array.isArray(comments)) {
-    //   throw new Error("Comments is not an array");
-    // }
-
-    // const finalArray = await Promise.all(
-    //   comments.map(async (post) => {
-    //     const authorId = post.authorId;
-    //     const userData = await userTbl.findOne({ _id: authorId });
-    //     return {
-    //       post,
-    //       user: {
-    //         _id: userData._id,
-    //         username: userData.username,
-    //         picture: userData.displayPicture.secure_url,
-    //         occupation: userData.occupation,
-    //       },
-    //     };
-    //   })
-    // );
-    // const sortedArray = finalArray.sort(
-    //   (a, b) =>
-    //     comments.findIndex((p) => p._id.equals(a.post._id)) -
-    //     comments.findIndex((p) => p._id.equals(b.post._id))
-    // );
-
-    res.json({ totalComments, comments: commentsCursor });
+    //  const authorId = comments.map(comment => comment.authorId);
+    //  console.log(authorId);
+    res.json(sortedArray);
   } catch (error) {
     // Handle errors
-    console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 exports.replyComment = async (req, res) => {
   const authorId = req.id;
