@@ -118,8 +118,6 @@ exports.updateCase = async (req, res) => {
 
     const caase = await helpmycaseTbl.findOne({ _id: caseId, userId });
 
-    console.log(updateData)
-
     if (!caase) {
       return res.status(404).json({ message: "case not found" });
     }

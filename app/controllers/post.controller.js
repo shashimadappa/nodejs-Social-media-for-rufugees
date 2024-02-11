@@ -28,7 +28,6 @@ const uploadImageToCloudinary = (file) => {
 
 exports.createPost2 = async (req, res) => {
   try {
-    // Construct post data
     const postData = {
       authorId: req.params.userId,
       content: req.body.content,
@@ -45,13 +44,8 @@ exports.createPost2 = async (req, res) => {
       // Add Cloudinary image URLs to post data
       postData.imageUrls = cloudinaryResults.map((result) => result.secure_url);
     }
-
-    console.log(postData);
-
-    // Use your Post model to create a post with the provided data
     const createdPost = await Post.create(postData);
 
-    // Respond with the created post or a success message
     res.status(201).json(createdPost);
   } catch (error) {
     console.error("Error creating post:", error);
@@ -97,9 +91,9 @@ exports.createPost = async (req, res) => {
       try {
         await Promise.all(uploadPromises);
 
-        // Create a new post object with the required data
+      
         const newPost = new post({
-          authorId: authorId, // Assuming this ID is constant for this example
+          authorId: authorId, 
           content: content,
           tags: tags,
           media: uploadResults,
@@ -241,7 +235,6 @@ exports.deletePost = async (req, res) => {
     if (!Post) {
       return res.status(404).json({ message: "Post not found" });
     }
-    // console.log ("post key : ",(Post.media[0].key))
     if (Post.media && Post.media[0].key) {
       // Delete the existing display picture from Cloudinary
       try {
@@ -324,7 +317,7 @@ exports.getPostByPostId = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const posts = await post.find({_id : id})
-    console.log(posts);
+
 
     const finalArray = await Promise.all(
       posts.map(async (post) => {
@@ -385,3 +378,74 @@ exports.getNoOfLikes = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+exports.updatePost = async (req, res) => {
+  const { postId } = req.params;
+  const { content, tags, updatedAt } = req.body;
+
+  try {
+    const existingPost = await post.findById(postId);
+
+    if (!existingPost) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+
+    if (content) {
+      existingPost.content = content;
+    }
+    if (tags) {
+      existingPost.tags = tags;
+    }
+    if (updatedAt) {
+      existingPost.editedAt = updatedAt;
+    }
+
+    // Check if there are files in the request
+    if (req.files && req.files.length > 0) {
+      const folder = "postMedia";
+      const uploadResults = [];
+
+      // Upload each file to Cloudinary
+      const uploadPromises = req.files.map((file) => {
+        return new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { resource_type: "auto", folder: folder },
+            (error, result) => {
+              if (error) {
+                reject({ error: "Upload failed", message: error.message });
+              } else {
+                const media = {
+                  url: result.secure_url,
+                  key: result.public_id,
+                };
+                uploadResults.push(media);
+                resolve();
+              }
+            }
+          ).end(file.buffer);
+        });
+      });
+
+      await Promise.all(uploadPromises);
+
+      // Delete previous pictures from Cloudinary
+      if (existingPost.media.length > 0) {
+        await Promise.all(
+          existingPost.media.map(async (media) => {
+            await cloudinary.uploader.destroy(media.key);
+          })
+        );
+      }
+
+      // Update post with new media
+      existingPost.media = uploadResults;
+    }
+
+    await existingPost.save();
+    res.json(existingPost);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error", message: error.message });
+  }
+};
+
+

@@ -46,7 +46,6 @@ exports.deletePost = async (req, res) => {
       _id: commentId,
       authorId: authorId,
     });
-    console.log(comment);
     if (!comment) {
       return res.status(404).json({ message: "comment not found" });
     }
@@ -101,9 +100,6 @@ const commentsNo = await commentTbl.countDocuments({postId})
         comments.findIndex((p) => p._id.equals(a._id)) -
         comments.findIndex((p) => p._id.equals(b._id))
     );
-
-    //  const authorId = comments.map(comment => comment.authorId);
-    //  console.log(authorId);
     res.json({sortedArray, commentsNo});
   } catch (error) {
     // Handle errors

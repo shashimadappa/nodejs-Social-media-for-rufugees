@@ -207,8 +207,6 @@ exports.findOneByUniqueId = async (req, res) => {
       const { _id, password, isActive, ...modifiedUsers } = post.toObject();
       return modifiedUsers;
     });
-
-    //  console.log(modifiedUsers);
     res.json(modifiedUsers);
   } catch (err) {
     // Handle errors
@@ -225,7 +223,6 @@ exports.findByLocation = async (req, res) => {
     if (!location) {
       return res.status(400).json({ error: "Location parameter is required" });
     }
-    console.log(location);
     const users = await User.find({ location });
 
     res.json(users);
