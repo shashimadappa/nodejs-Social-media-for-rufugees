@@ -91,9 +91,9 @@ exports.createPost = async (req, res) => {
       try {
         await Promise.all(uploadPromises);
 
-      
+
         const newPost = new post({
-          authorId: authorId, 
+          authorId: authorId,
           content: content,
           tags: tags,
           media: uploadResults,
@@ -228,14 +228,11 @@ exports.deletePost = async (req, res) => {
   try {
     const postId = req.params.postId;
     const userId = req.userId;
-
-    // Find the post by ID and user ID
     const Post = await post.findOne({ _id: postId, userId });
-
     if (!Post) {
       return res.status(404).json({ message: "Post not found" });
     }
-    if (Post.media && Post.media[0].key) {
+    if (Post.media && Post.media[0]?.key) {
       // Delete the existing display picture from Cloudinary
       try {
         await cloudinary.uploader.destroy(Post.media[0].key);
@@ -316,7 +313,7 @@ exports.getPostByPostId = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const posts = await post.find({_id : id})
+    const posts = await post.find({ _id: id })
 
 
     const finalArray = await Promise.all(
