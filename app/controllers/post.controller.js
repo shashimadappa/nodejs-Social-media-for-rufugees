@@ -1,6 +1,7 @@
 const db = require("../models");
 const post = db.post;
 const userTbl = db.users;
+const commentTbl = db.comment;
 
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -186,7 +187,7 @@ exports.findAll = async (req, res) => {
       posts.map(async (post) => {
         const authorId = post.authorId;
         const userData = await userTbl.findOne({ _id: authorId });
-        const commentsNo = await commentTbl.countDocuments({postIdy: post._id})
+        const commentsNo = await commentTbl.countDocuments({postId: post._id})
 
         // Embed user data within each post object
         return {
