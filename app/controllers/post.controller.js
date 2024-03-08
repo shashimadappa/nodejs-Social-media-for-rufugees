@@ -1,7 +1,6 @@
 const db = require("../models");
 const post = db.post;
 const userTbl = db.users;
-const commentTbl = db.comment;
 
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
@@ -171,6 +170,8 @@ exports.likePost = async (req, res) => {
 
 exports.findAll = async (req, res) => {
   try {
+    // Updated pagination logic: Get posts based on URI parameters
+    // const 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
@@ -185,8 +186,9 @@ exports.findAll = async (req, res) => {
       posts.map(async (post) => {
         const authorId = post.authorId;
         const userData = await userTbl.findOne({ _id: authorId });
-        const commentsNo = await commentTbl.countDocuments({postId: post._id})
-        console.log(commentsNo)
+        const commentsNo = await commentTbl.countDocuments({postIdy: post._id})
+
+        // Embed user data within each post object
         return {
           _id: post._id,
           media: post.media,
@@ -202,34 +204,26 @@ exports.findAll = async (req, res) => {
             picture: userData.displayPicture.secure_url,
             occupation: userData.occupation,
             uniqueId: userData.uniqueId
+            // Include other user fields as needed
+            // Add more fields as needed
           },
         };
       })
     );
 
+    // Sort the finalArray based on the original order of posts
     const sortedArray = finalArray.sort(
       (a, b) =>
         posts.findIndex((p) => p._id.equals(a._id)) -
         posts.findIndex((p) => p._id.equals(b._id))
     );
 
-    res.status(200).json({
-      success: true,
-      message: "Posts retrieved successfully",
-      functionName: "findAll",
-      data: sortedArray,
-    });
+    res.json(sortedArray);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ 
-      success: false,
-      error: "Internal Server Error",
-      functionName: "findAll"
-    });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
 
 // Delete a post by ID
 exports.deletePost = async (req, res) => {
@@ -289,38 +283,23 @@ exports.getAllById = async (req, res) => {
   const id = req.params.id;
   if (!id) {
     return res.status(400).json({
-      success: false,
-      message: "User ID not provided",
-      functionName: "getAllById"
+      message: "User not found",
     });
   }
 
-  try {
-    const posts = await post.find({ authorId: id });
-    if (!posts.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No posts found with the provided author ID",
-        functionName: "getAllById"
-      });
-    }
-    
-    res.status(200).json({
-      success: true,
-      message: "Posts retrieved successfully",
-      data: posts,
-      functionName: "getAllById"
+  const posts = await post
+    .find({ authorId: id })
+    .then((data) => {
+      if (!data)
+        res.status(404).send({ message: "Not found post with id " + id });
+      else res.send(data);
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .send({ message: "Error retrieving Tutorial with id=" + id });
     });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error retrieving posts",
-      error: error.message,
-      functionName: "getAllById"
-    });
-  }
 };
-
 
 exports.getPostByPostId = async (req, res) => {
   const id = req.params.id;
