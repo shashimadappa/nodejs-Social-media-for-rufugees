@@ -18,6 +18,9 @@ module.exports = (app) => {
   router.get("/findUserByTags/:tags", token.validateToken, user.findUserByTags);
   router.get("/getAllUsers", token.validateToken, user.getAllUsers);
 
+  router.get("/getAllUsersLocation", token.validateToken, user.getAllUsersLocation);
+
+
   router.get(
     "/getUserByuniqueId/:uniqueId",
     token.validateToken,
