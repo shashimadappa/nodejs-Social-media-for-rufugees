@@ -435,4 +435,26 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+exports.getAllUsersLocation = async (req, res) => {
+  try {
+
+    const usersLocation = await User.aggregate([
+      {
+        $group: {
+          _id: '$location', // Group by location
+          count: { $sum: 1 } // Count occurrences
+        }
+      }
+    ]);
+    const formattedUsersLocation = usersLocation.map(location => ({
+      location: location._id,
+      count: location.count
+    }));
+    res.json(formattedUsersLocation);
+  } catch (error) {
+    console.error(error);
+      res.status(500).json({ message: "Error occurred during getUsersLocation" });
+ }
+};
+
 
