@@ -399,6 +399,9 @@ exports.updatePost = async (req, res) => {
     if (updatedAt) {
       existingPost.editedAt = updatedAt;
     }
+    // if(existingPost){
+    //   existingPost.
+    // }
 
     // Check if there are files in the request
     if (req.files && req.files.length > 0) {

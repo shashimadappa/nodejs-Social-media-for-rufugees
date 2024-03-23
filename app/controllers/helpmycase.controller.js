@@ -133,3 +133,29 @@ exports.updateCase = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+exports.findCaseById = async (req, res) => {
+  try {
+    const caseId = req.params.caseId;
+    const userId = req.userId;
+    const updateData = req.body; 
+
+    const caase = await helpmycaseTbl.findOne({ _id: caseId, userId });
+
+    if (!caase) {
+      return res.status(404).json({ message: "case not found" });
+    }
+
+const response = {
+  api: 'findCaseById',
+  data: caase
+}
+
+
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};

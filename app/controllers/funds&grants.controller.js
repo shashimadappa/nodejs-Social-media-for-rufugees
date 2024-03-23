@@ -149,3 +149,25 @@ exports.updateFunds = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+exports.getFundsById = async (req, res) => {
+  try {
+    const fundsId = req.params.fundsId;
+    const userId = req.userId;
+    const updateData = req.body; 
+
+    const funds = await fundsTbl.findOne({ _id: fundsId });
+
+    if (!funds) {
+      return res.status(404).json({ message: "fundraising post not found" });
+    }
+const response = {
+  api: 'getFundsById',
+  data: funds
+}
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
