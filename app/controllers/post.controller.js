@@ -187,7 +187,7 @@ exports.findAll = async (req, res) => {
       posts.map(async (post) => {
         const authorId = post.authorId;
         const userData = await userTbl.findOne({ _id: authorId });
-        const commentsNo = await commentTbl.countDocuments({postId: post._id})
+        const commentsNo = await commentTbl.countDocuments({ postId: post._id })
 
         // Embed user data within each post object
         return {
@@ -381,7 +381,19 @@ exports.getNoOfLikes = async (req, res) => {
 
 exports.updatePost = async (req, res) => {
   const { postId } = req.params;
-  const { content, tags, updatedAt } = req.body;
+  const { content, tags, updatedAt, newMedia } = req.body;
+
+  // const mediadup = [
+  //   // {
+  //   //   url: "https://res.cloudinary.com/dppua0ebn/image/upload/v1711191565/postMedia/h2y7pjixqicej4jsyjxz.png",
+  //   //   key: "postMedia/h2y7pjixqicej4jsyjxz"
+  //   // },
+  // ]
+  // {
+  //   url: "https://res.cloudinary.com/dppua0ebn/image/upload/v1711191565/postMedia/qv8sscbsx0rkg3zepcln.png",
+  //   key: "postMedia/qv8sscbsx0rkg3zepcln"
+  // }
+  // const mediadup = 0
 
   try {
     const existingPost = await post.findById(postId);
@@ -399,11 +411,36 @@ exports.updatePost = async (req, res) => {
     if (updatedAt) {
       existingPost.editedAt = updatedAt;
     }
-    // if(existingPost){
-    //   existingPost.
-    // }
 
-    // Check if there are files in the request
+    if (newMedia) {
+      for (let index = 0; index < existingPost.media.length; index++) {
+        const media = existingPost.media[index];
+        if (mediadup[index]) {
+          // Compare media objects, assuming they are objects with properties
+          if (JSON.stringify(media) !== JSON.stringify(mediadup[index])) {
+            if (existingPost.media.length > 0) {
+              await Promise.all(
+                existingPost.media.map(async (media) => {
+                  await cloudinary.uploader.destroy(media.key);
+                })
+              );
+            }
+          }
+        }
+      }
+      existingPost.media = mediadup;
+      const updatedUser = await post.findByIdAndUpdate(postId, existingPost, {
+        new: true,
+      });
+      res.json(updatedUser);
+    } else if (newMedia === 0) {
+      existingPost.media = null;
+      const updatedUser = await post.findByIdAndUpdate(postId, existingPost, {
+        new: true,
+      });
+      res.json(updatedUser);
+    }
+
     if (req.files && req.files.length > 0) {
       const folder = "postMedia";
       const uploadResults = [];
@@ -432,17 +469,21 @@ exports.updatePost = async (req, res) => {
       await Promise.all(uploadPromises);
 
       // Delete previous pictures from Cloudinary
-      if (existingPost.media.length > 0) {
-        await Promise.all(
-          existingPost.media.map(async (media) => {
-            await cloudinary.uploader.destroy(media.key);
-          })
-        );
-      }
+      // if (existingPost.media.length > 0) {
+      //   await Promise.all(
+      //     existingPost.media.map(async (media) => {
+      //       await cloudinary.uploader.destroy(media.key);
+      //     })
+      //   );
+      // }
 
       // Update post with new media
-      existingPost.media = uploadResults;
+      existingPost.media.push(...uploadResults);
+
     }
+
+
+
 
     await existingPost.save();
     res.json(existingPost);
@@ -450,5 +491,79 @@ exports.updatePost = async (req, res) => {
     res.status(500).json({ error: "Internal server error", message: error.message });
   }
 };
+
+
+
+// exports.updatePost = async (req, res) => {
+//   const { postId } = req.params;
+//   const { content, tags, updatedAt } = req.body;
+
+//   try {
+//     const existingPost = await post.findById(postId);
+
+//     if (!existingPost) {
+//       return res.status(404).json({ error: "Post not found" });
+//     }
+
+//     if (content) {
+//       existingPost.content = content;
+//     }
+//     if (tags) {
+//       existingPost.tags = tags;
+//     }
+//     if (updatedAt) {
+//       existingPost.editedAt = updatedAt;
+//     }
+//     // if(existingPost){
+//     //   existingPost.
+//     // }
+
+//     // Check if there are files in the request
+//     if (req.files && req.files.length > 0) {
+//       const folder = "postMedia";
+//       const uploadResults = [];
+
+//       // Upload each file to Cloudinary
+//       const uploadPromises = req.files.map((file) => {
+//         return new Promise((resolve, reject) => {
+//           cloudinary.uploader.upload_stream(
+//             { resource_type: "auto", folder: folder },
+//             (error, result) => {
+//               if (error) {
+//                 reject({ error: "Upload failed", message: error.message });
+//               } else {
+//                 const media = {
+//                   url: result.secure_url,
+//                   key: result.public_id,
+//                 };
+//                 uploadResults.push(media);
+//                 resolve();
+//               }
+//             }
+//           ).end(file.buffer);
+//         });
+//       });
+
+//       await Promise.all(uploadPromises);
+
+//       // Delete previous pictures from Cloudinary
+//       if (existingPost.media.length > 0) {
+//         await Promise.all(
+//           existingPost.media.map(async (media) => {
+//             await cloudinary.uploader.destroy(media.key);
+//           })
+//         );
+//       }
+
+//       // Update post with new media
+//       existingPost.media = uploadResults;
+//     }
+
+//     await existingPost.save();
+//     res.json(existingPost);
+//   } catch (error) {
+//     res.status(500).json({ error: "Internal server error", message: error.message });
+//   }
+// };
 
 
