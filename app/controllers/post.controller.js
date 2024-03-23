@@ -433,7 +433,7 @@ exports.updatePost = async (req, res) => {
         new: true,
       });
       res.json(updatedUser);
-    } else if (newMedia === 0) 
+    } else if (newMedia === 0) {
       await Promise.all(
         existingPost.media.map(async (media) => {
           await cloudinary.uploader.destroy(media.key);
@@ -487,12 +487,9 @@ exports.updatePost = async (req, res) => {
 
     }
 
-
-
-
     await existingPost.save();
     res.json(existingPost);
-  } catch (error) {
+  }catch (error) {
     res.status(500).json({ error: "Internal server error", message: error.message });
   }
 };
