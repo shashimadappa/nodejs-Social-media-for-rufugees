@@ -26,6 +26,9 @@ module.exports = (mongoose) => {
         type: Number,
         // required: true,
       },
+      currency: {
+        type :String
+      },
       location: {
         type: String,
         // required: true,
