@@ -381,7 +381,7 @@ exports.getNoOfLikes = async (req, res) => {
 
 exports.updatePost = async (req, res) => {
   const { postId } = req.params;
-  const { content, tags, updatedAt, newMedia } = req.body;
+  const { content, tags, updatedAt,  media: newMedia = 0} = req.body;
 
   // const mediadup = [
   //   // {
@@ -433,13 +433,21 @@ exports.updatePost = async (req, res) => {
         new: true,
       });
       res.json(updatedUser);
-    } else if (newMedia === 0) {
-      existingPost.media = null;
+    }else if (newMedia === 0) {
+      if (existingPost.media && existingPost.media.length > 0) {
+          await Promise.all(
+              existingPost.media.map(async (media) => {
+                  await cloudinary.uploader.destroy(media.key);
+              })
+          );
+          existingPost.media = null; // or empty array, depending on your preference
+      }
+  
       const updatedUser = await post.findByIdAndUpdate(postId, existingPost, {
-        new: true,
+          new: true,
       });
       res.json(updatedUser);
-    }
+  }
 
     if (req.files && req.files.length > 0) {
       const folder = "postMedia";
