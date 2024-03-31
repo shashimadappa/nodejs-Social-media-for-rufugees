@@ -47,21 +47,6 @@ exports.createFunds = async (req, res) => {
   }
 };
 
-//   exports.findAll = async (req, res) => {
-//     try {
-//       // Pagination logic: Get 10 posts at a time
-//       const page = parseInt(req.query.page) || 1;
-//       const limit = 10;
-//       const skip = (page - 1) * limit;
-
-//       const posts = await fundsTbl.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
-//       res.json(posts);
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ error: 'Internal Server Error' });
-//     }
-// };
-
 exports.findAll = async (req, res) => {
   try {
     // Updated pagination logic: Get posts based on URI parameters
@@ -136,14 +121,14 @@ exports.updateFunds = async (req, res) => {
     const funds = await fundsTbl.findOne({ _id: fundsId });
 
     if (!funds) {
-      return res.status(404).json({ message: "case not found" });
+      return res.status(404).json({ message: "funds not found" });
     }
 
     const updatedFunds = await fundsTbl.findByIdAndUpdate(fundsId, updateData, {
       new: true,
     });
 
-    res.json({ message: "funds deleted successfully", updatedFunds: updatedFunds });
+    res.json({ message: "funds updated successfully", updatedFunds: updatedFunds });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });

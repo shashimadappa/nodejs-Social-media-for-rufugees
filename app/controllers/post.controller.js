@@ -198,6 +198,7 @@ exports.findAll = async (req, res) => {
           tags: post.tags,
           isActive: post.isActive,
           createdAt: post.createdAt,
+          updatedAt: post?.updatedAt || '',
           commentsNo,
           user: {
             _id: userData._id,
@@ -333,6 +334,7 @@ exports.getPostByPostId = async (req, res) => {
           tags: post.tags,
           isActive: post.isActive,
           createdAt: post.createdAt,
+          updatedAt: post?.updatedAt || '',
           user: {
             _id: userData._id,
             username: userData.username,
@@ -379,22 +381,21 @@ exports.getNoOfLikes = async (req, res) => {
   }
 };
 
+
+// const mediadup = [
+//   // {
+//   //   url: "https://res.cloudinary.com/dppua0ebn/image/upload/v1711191565/postMedia/h2y7pjixqicej4jsyjxz.png",
+//   //   key: "postMedia/h2y7pjixqicej4jsyjxz"
+//   // },
+// ]
+// {
+//   url: "https://res.cloudinary.com/dppua0ebn/image/upload/v1711191565/postMedia/qv8sscbsx0rkg3zepcln.png",
+//   key: "postMedia/qv8sscbsx0rkg3zepcln"
+// }
+// const mediadup = 0
 exports.updatePost = async (req, res) => {
   const { postId } = req.params;
-  const { content, tags, updatedAt,  media: newMedia } = req.body;
-
-  // const mediadup = [
-  //   // {
-  //   //   url: "https://res.cloudinary.com/dppua0ebn/image/upload/v1711191565/postMedia/h2y7pjixqicej4jsyjxz.png",
-  //   //   key: "postMedia/h2y7pjixqicej4jsyjxz"
-  //   // },
-  // ]
-  // {
-  //   url: "https://res.cloudinary.com/dppua0ebn/image/upload/v1711191565/postMedia/qv8sscbsx0rkg3zepcln.png",
-  //   key: "postMedia/qv8sscbsx0rkg3zepcln"
-  // }
-  // const mediadup = 0
-
+  const { content, tags, updatedAt, media: newMedia } = req.body;
   try {
     const existingPost = await post.findById(postId);
 
@@ -409,7 +410,7 @@ exports.updatePost = async (req, res) => {
       existingPost.tags = tags;
     }
     if (updatedAt) {
-      existingPost.editedAt = updatedAt;
+      existingPost.updatedAt = updatedAt;
     }
 
     if (newMedia) {
@@ -439,7 +440,7 @@ exports.updatePost = async (req, res) => {
           await cloudinary.uploader.destroy(media.key);
         })
       );
-       existingPost.media = null;
+      existingPost.media = null;
       const updatedUser = await post.findByIdAndUpdate(postId, existingPost, {
         new: true,
       });
@@ -489,7 +490,7 @@ exports.updatePost = async (req, res) => {
 
     await existingPost.save();
     res.json(existingPost);
-  }catch (error) {
+  } catch (error) {
     res.status(500).json({ error: "Internal server error", message: error.message });
   }
 };

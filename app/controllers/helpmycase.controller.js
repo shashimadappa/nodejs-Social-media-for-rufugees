@@ -129,7 +129,7 @@ exports.updateCase = async (req, res) => {
     });
 
 
-    res.json({ message: "case deleted successfully", updatedUser: updatedUser });
+    res.json({ message: "case updated successfully", updatedUser: updatedUser });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
